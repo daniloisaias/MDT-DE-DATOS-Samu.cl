@@ -1,62 +1,105 @@
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #000;
-  overflow: hidden;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(to right, #000428, #004e92);
   color: white;
+  overflow-x: hidden;
 }
 
-#particles-js {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-.container {
+.titulo-neon {
   text-align: center;
-  margin-top: 100px;
-  padding: 30px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 2px solid #0ff;
-  border-radius: 20px;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 0 30px #0ff;
+  font-size: 3rem;
+  margin-top: 30px;
+  color: #0ff;
+  text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
 }
 
-.neon {
-  font-size: 2em;
-  color: #0ff;
-  text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+.contenedor {
+  text-align: center;
+  padding: 30px;
+}
+
+.secciones {
+  margin-top: 30px;
+}
+
+.btn-seccion {
+  padding: 15px 25px;
+  margin: 10px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 0 15px #fff;
+}
+
+.btn-seccion:hover {
+  transform: scale(1.1);
+}
+
+.azul { background-color: #007bff; }
+.morado { background-color: #6f42c1; }
+.verde { background-color: #28a745; }
+.rojo { background-color: #dc3545; }
+
+.formulario {
+  display: none;
+  margin-top: 30px;
+  animation: aparecer 0.8s ease;
 }
 
 form input, form textarea {
-  width: 90%;
+  display: block;
+  width: 80%;
+  max-width: 500px;
+  margin: 10px auto;
   padding: 10px;
-  margin: 10px 0;
+  border-radius: 5px;
   border: none;
-  border-radius: 10px;
-  outline: none;
-  font-size: 16px;
-  background: #111;
-  color: #0ff;
-  box-shadow: 0 0 5px #0ff;
 }
 
-form button {
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  border-radius: 10px;
-  background: #0ff;
+textarea {
+  height: 100px;
+}
+
+.btn-enviar {
+  padding: 10px 25px;
+  background: #00ffe0;
   color: #000;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: 0.3s;
+  margin-top: 10px;
+  box-shadow: 0 0 20px #00ffe0;
+  transition: background 0.3s ease;
 }
 
-form button:hover {
-  background: #00ffff;
-  box-shadow: 0 0 20px #0ff;
+.btn-enviar:hover {
+  background: #00c4ff;
+}
+
+/* Animaciones */
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Partículas decorativas */
+.particulas::before, .particulas::after {
+  content: "";
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  animation: flotar 5s infinite ease-in-out;
+}
+
+@keyframes flotar {
+  0% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-30px) translateX(20px); }
+  100% { transform: translateY(0) translateX(0); }
 }
