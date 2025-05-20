@@ -1,155 +1,159 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MDT - Sistema SAMU</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel SAMU Metropolitana</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="particles-js"></div>
-
-  <header class="top-bar">
-    <div class="perfil">
-      <img id="imagenPerfil" src="default.png" alt="Perfil" />
-      <div>
-        <h3 id="usuarioNombre">No conectado</h3>
-        <button onclick="cambiarImagen()">Cambiar Imagen</button>
-      </div>
+  
+  <!-- Perfil y dropdown -->
+  <div class="profile-container">
+    <img src="default.png" id="profilePic" class="profile-pic" alt="Perfil">
+    <div id="profileDropdown" class="dropdown">
+      <button onclick="changeTheme('light')">Modo Claro</button>
+      <button onclick="changeTheme('dark')">Modo Oscuro</button>
+      <button onclick="changeProfilePic()">Cambiar Imagen</button>
+      <button class="logout" onclick="logout()">Cerrar Sesión</button>
     </div>
-    <button onclick="cerrarSesion()" class="cerrar-sesion">Cerrar Sesión</button>
-  </header>
+  </div>
 
-  <main class="container">
-    <section id="login">
-      <h2>Iniciar Sesión SAMU</h2>
-      <input type="text" id="nombreUsuario" placeholder="Nombre completo" />
-      <input type="text" id="placaUsuario" placeholder="Placa" />
-      <button onclick="iniciarSesion()">Ingresar</button>
-    </section>
+  <!-- Contenido Principal -->
+  <div class="container">
+    <!-- Inicio de Sesión -->
+    <div class="formulario" id="loginForm">
+      <h2>Iniciar Sesión</h2>
+      <input type="text" id="username" placeholder="Nombre de usuario">
+      <input type="text" id="placa" placeholder="Placa">
+      <button onclick="login()">Iniciar Sesión</button>
+    </div>
 
-    <section id="formulario" style="display:none;">
+    <!-- Formulario Paciente -->
+    <div class="formulario" id="pacienteForm" style="display:none;">
       <h2>Registrar Paciente</h2>
-      <input type="text" id="pacienteNombre" placeholder="Nombre del paciente" />
-      <input type="text" id="pacienteApellido" placeholder="Apellido del paciente" />
-      <input type="text" id="razon" placeholder="Razón" />
-      <button onclick="guardarPaciente()">Guardar Paciente</button>
-    </section>
+      <input type="text" id="nombrePaciente" placeholder="Nombre del paciente">
+      <input type="text" id="apellidoPaciente" placeholder="Apellido del paciente">
+      <input type="text" id="rutPaciente" placeholder="RUT">
+      <input type="text" id="motivo" placeholder="Motivo de atención">
+      <button onclick="registrarPaciente()">Registrar</button>
+    </div>
 
-    <section id="panel">
+    <!-- Registros -->
+    <div class="registros">
       <h2>Registros</h2>
-      <ul id="listaRegistros"></ul>
-    </section>
+      <ul id="listaPacientes"></ul>
+    </div>
+  </div>
 
-    <section id="usuarios">
-      <h2>Usuarios</h2>
-      <ul id="listaUsuarios"></ul>
-    </section>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+  <!-- Script completo -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
   <script>
-    tsParticles.load("particles-js", {
-      particles: {
-        number: { value: 60 },
-        size: { value: 4 },
-        color: { value: "#00faff" },
-        move: { enable: true, speed: 2 },
-        line_linked: { enable: true, distance: 100, color: "#fff" }
+    // Inicializar Partículas
+    particlesJS.load('particles-js', 'https://cdn.jsdelivr.net/gh/VincentGarreau/particles.js/particles.json');
+
+    // Usuarios admin definidos
+    const admins = ['Danilo', 'Carlos'];
+
+    // Al cargar la página
+    window.onload = () => {
+      const usuario = localStorage.getItem('usuario');
+      const placa = localStorage.getItem('placa');
+      const imagen = localStorage.getItem('imagen');
+      if (usuario && placa) {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('pacienteForm').style.display = 'block';
+        document.getElementById('profilePic').src = imagen || 'default.png';
+        if (admins.includes(usuario)) document.body.classList.add('admin-border');
+        mostrarPacientes();
       }
-    });
+    };
 
-    const admins = ["danilo cuevas", "jefe samu", "admin general"];
-    let usuario = JSON.parse(localStorage.getItem("usuarioSAMU")) || null;
-
-    if (usuario) cargarSesion();
-
-    function iniciarSesion() {
-      const nombre = document.getElementById("nombreUsuario").value.toLowerCase();
-      const placa = document.getElementById("placaUsuario").value;
-      if (!nombre || !placa) return;
-      usuario = { nombre, placa };
-      localStorage.setItem("usuarioSAMU", JSON.stringify(usuario));
-      cargarSesion();
+    // Iniciar sesión
+    function login() {
+      const usuario = document.getElementById('username').value;
+      const placa = document.getElementById('placa').value;
+      if (!usuario || !placa) return alert('Completa todos los campos');
+      localStorage.setItem('usuario', usuario);
+      localStorage.setItem('placa', placa);
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('pacienteForm').style.display = 'block';
+      if (admins.includes(usuario)) document.body.classList.add('admin-border');
+      mostrarPacientes();
     }
 
-    function cargarSesion() {
-      document.getElementById("login").style.display = "none";
-      document.getElementById("formulario").style.display = "block";
-      document.getElementById("usuarioNombre").innerText = usuario.nombre;
-      mostrarRegistros();
-      mostrarUsuarios();
+    // Registrar paciente
+    function registrarPaciente() {
+      const nombre = document.getElementById('nombrePaciente').value;
+      const apellido = document.getElementById('apellidoPaciente').value;
+      const rut = document.getElementById('rutPaciente').value;
+      const motivo = document.getElementById('motivo').value;
+      if (!nombre || !apellido || !rut || !motivo) return alert('Completa todo');
+      const pacientes = JSON.parse(localStorage.getItem('pacientes') || '[]');
+      pacientes.push({ nombre, apellido, rut, motivo });
+      localStorage.setItem('pacientes', JSON.stringify(pacientes));
+      mostrarPacientes();
     }
 
-    function cerrarSesion() {
-      localStorage.removeItem("usuarioSAMU");
+    // Mostrar pacientes
+    function mostrarPacientes() {
+      const lista = document.getElementById('listaPacientes');
+      lista.innerHTML = '';
+      const pacientes = JSON.parse(localStorage.getItem('pacientes') || '[]');
+      pacientes.forEach((p, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${p.nombre} ${p.apellido} (${p.rut}) - ${p.motivo}`;
+        if (admins.includes(localStorage.getItem('usuario'))) {
+          const btn = document.createElement('button');
+          btn.textContent = 'Eliminar';
+          btn.onclick = () => eliminarPaciente(i);
+          li.appendChild(btn);
+        }
+        lista.appendChild(li);
+      });
+    }
+
+    function eliminarPaciente(i) {
+      const pacientes = JSON.parse(localStorage.getItem('pacientes'));
+      pacientes.splice(i, 1);
+      localStorage.setItem('pacientes', JSON.stringify(pacientes));
+      mostrarPacientes();
+    }
+
+    function logout() {
+      localStorage.removeItem('usuario');
+      localStorage.removeItem('placa');
       location.reload();
     }
 
-    function cambiarImagen() {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
+    function changeTheme(theme) {
+      document.body.className = theme === 'light' ? 'theme-light' : 'theme-dark';
+      localStorage.setItem('theme', theme);
+    }
+
+    function changeProfilePic() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
       input.onchange = () => {
         const file = input.files[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-          document.getElementById("imagenPerfil").src = reader.result;
-          localStorage.setItem("imgPerfil", reader.result);
-        };
-        reader.readAsDataURL(file);
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            const dataURL = e.target.result;
+            localStorage.setItem('imagen', dataURL);
+            document.getElementById('profilePic').src = dataURL;
+          };
+          reader.readAsDataURL(file);
+        }
       };
       input.click();
     }
 
-    const imgGuardada = localStorage.getItem("imgPerfil");
-    if (imgGuardada) document.getElementById("imagenPerfil").src = imgGuardada;
-
-    function guardarPaciente() {
-      const nombre = document.getElementById("pacienteNombre").value;
-      const apellido = document.getElementById("pacienteApellido").value;
-      const razon = document.getElementById("razon").value;
-      if (!nombre || !apellido || !razon) return;
-      const registro = { nombre, apellido, razon, creadoPor: usuario.nombre, fecha: new Date().toLocaleString() };
-      let registros = JSON.parse(localStorage.getItem("registrosSAMU")) || [];
-      registros.push(registro);
-      localStorage.setItem("registrosSAMU", JSON.stringify(registros));
-      mostrarRegistros();
-      mostrarUsuarios();
-    }
-
-    function mostrarRegistros() {
-      const lista = document.getElementById("listaRegistros");
-      const registros = JSON.parse(localStorage.getItem("registrosSAMU")) || [];
-      lista.innerHTML = "";
-      registros.forEach((r, i) => {
-        lista.innerHTML += `
-          <li>
-            <strong>${r.nombre} ${r.apellido}</strong> - ${r.razon} <br/><em>Por: ${r.creadoPor}</em>
-            ${esAdmin() ? `<br/><button onclick="eliminarRegistro(${i})">Eliminar</button>` : ""}
-          </li>
-        `;
-      });
-    }
-
-    function mostrarUsuarios() {
-      const registros = JSON.parse(localStorage.getItem("registrosSAMU")) || [];
-      const lista = document.getElementById("listaUsuarios");
-      const nombres = [...new Set(registros.map(r => r.creadoPor))];
-      lista.innerHTML = nombres.map(n => `<li>${n}</li>`).join("");
-    }
-
-    function eliminarRegistro(i) {
-      let registros = JSON.parse(localStorage.getItem("registrosSAMU")) || [];
-      registros.splice(i, 1);
-      localStorage.setItem("registrosSAMU", JSON.stringify(registros));
-      mostrarRegistros();
-      mostrarUsuarios();
-    }
-
-    function esAdmin() {
-      return usuario && admins.includes(usuario.nombre);
-    }
+    document.getElementById('profilePic').onclick = () => {
+      document.getElementById('profileDropdown').classList.toggle('active');
+    };
   </script>
 </body>
 </html>
