@@ -2,7 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 body {
@@ -10,8 +10,10 @@ body {
   color: #ffffff;
   overflow-x: hidden;
   min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
 }
 
+/* Partículas */
 #particles-js {
   position: fixed;
   width: 100%;
@@ -19,6 +21,7 @@ body {
   z-index: -1;
 }
 
+/* Contenedor principal */
 .container {
   display: flex;
   justify-content: space-around;
@@ -29,7 +32,8 @@ body {
 
 .formulario,
 .registros,
-.perfil {
+.perfil,
+.resultados {
   background: rgba(255, 255, 255, 0.05);
   padding: 20px;
   border-radius: 12px;
@@ -40,12 +44,14 @@ body {
   min-height: 300px;
 }
 
+/* Títulos */
 h2 {
   margin-bottom: 15px;
   text-align: center;
   color: #00faff;
 }
 
+/* Inputs y botones */
 input[type="text"],
 input[type="file"],
 select {
@@ -75,6 +81,16 @@ button:hover {
   background: #00b8d4;
 }
 
+/* Botón de cerrar sesión */
+button.logout {
+  background: #ff4f4f;
+  color: white;
+}
+button.logout:hover {
+  background: #d73737;
+}
+
+/* Lista de registros */
 ul {
   list-style: none;
   padding-left: 0;
@@ -90,6 +106,7 @@ ul li {
   color: #fff;
 }
 
+/* Panel de resultados */
 .resultados {
   margin: 20px;
   padding: 20px;
@@ -97,10 +114,6 @@ ul li {
   border-radius: 12px;
   max-width: 95%;
   box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
-}
-
-.resultados h2 {
-  color: #00faff;
 }
 
 .resultados ul li {
@@ -111,32 +124,85 @@ ul li {
   border-radius: 10px;
 }
 
-.perfil {
-  text-align: center;
+/* Perfil */
+.profile-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  text-align: right;
+  z-index: 10;
 }
 
-.perfil img {
-  width: 100px;
-  height: 100px;
+.profile-pic {
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: 3px solid #00faff;
-  margin-bottom: 10px;
+  cursor: pointer;
   object-fit: cover;
 }
 
-.perfil button {
+.dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
   margin-top: 10px;
-  width: auto;
+  background: #1e1e2f;
+  padding: 10px;
+  border-radius: 10px;
+  width: 200px;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  text-align: left;
 }
 
-.perfil span {
+.dropdown.active {
   display: block;
-  font-size: 18px;
-  margin: 5px 0;
-  color: #00faff;
 }
 
-.admin {
-  border: 2px solid #ff0;
-  box-shadow: 0 0 10px #ff0;
+.dropdown button {
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+/* Admin */
+.admin-border {
+  border: 2px solid gold;
+  box-shadow: 0 0 10px gold;
+}
+
+/* Temas */
+.theme-dark {
+  background: #0d1117;
+  color: white;
+}
+
+.theme-light {
+  background: #f5f5f5;
+  color: black;
+}
+
+.theme-light .formulario,
+.theme-light .registros,
+.theme-light .perfil,
+.theme-light .resultados,
+.theme-light .dropdown {
+  background: rgba(0, 0, 0, 0.05);
+  color: black;
+}
+
+.theme-light input,
+.theme-light select {
+  background: #ddd;
+  color: #000;
+}
+
+.theme-light button {
+  background: #00b8d4;
+  color: #fff;
+}
+
+.theme-light button.logout {
+  background: #e53935;
 }
