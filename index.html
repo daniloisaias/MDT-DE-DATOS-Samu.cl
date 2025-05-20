@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Centro de Tickets - SAMU</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tickets SAMU</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="contenedor">
-    <h1 class="titulo-neon">Sistema de Tickets - SAMU</h1>
+    <h1 class="titulo-neon">Sistema de Tickets - SAMU Metropolitana RP</h1>
+
     <div class="secciones">
-      <button onclick="mostrarFormulario('reincorporarse')" class="btn-seccion azul">Reincorporarse a SAMU</button>
+      <button onclick="mostrarFormulario('reincorporarse')" class="btn-seccion azul">Reincorporarse</button>
       <button onclick="mostrarFormulario('altoMando')" class="btn-seccion morado">Hablar con Alto Mando</button>
       <button onclick="mostrarFormulario('soporte')" class="btn-seccion verde">Soporte General</button>
       <button onclick="mostrarFormulario('reportar')" class="btn-seccion rojo">Reportar a SAMU</button>
@@ -19,9 +20,25 @@
     <div class="formulario" id="formulario">
       <h2 id="titulo-formulario">Formulario</h2>
       <form id="ticketForm" action="https://tusitio.com/revisar" method="POST" target="_blank">
-        <input type="text" name="nombre" placeholder="Tu Nombre" required />
-        <input type="text" name="usuario" placeholder="Tu Usuario Discord" required />
-        <textarea name="mensaje" placeholder="Escribe tu motivo aquí..." required></textarea>
+        <input type="text" name="nombre" placeholder="Tu nombre" required>
+        <input type="text" name="usuario" placeholder="Tu usuario de Discord" required>
+
+        <div id="seccion-reincorporarse" class="seccion-dinamica">
+          <textarea name="motivo" placeholder="¿Por qué deseas reincorporarte?" required></textarea>
+        </div>
+
+        <div id="seccion-altoMando" class="seccion-dinamica">
+          <textarea name="asunto" placeholder="¿Qué deseas comunicar al Alto Mando?" required></textarea>
+        </div>
+
+        <div id="seccion-soporte" class="seccion-dinamica">
+          <textarea name="problema" placeholder="Describe tu problema o duda" required></textarea>
+        </div>
+
+        <div id="seccion-reportar" class="seccion-dinamica">
+          <textarea name="reporte" placeholder="¿Qué deseas reportar?" required></textarea>
+        </div>
+
         <button type="submit" class="btn-enviar">Enviar Informe</button>
       </form>
     </div>
@@ -31,19 +48,17 @@
 
   <script>
     function mostrarFormulario(seccion) {
-      const formulario = document.getElementById('formulario');
-      const titulo = document.getElementById('titulo-formulario');
+      document.getElementById('formulario').style.display = 'block';
+      document.getElementById('titulo-formulario').textContent = `Formulario - ${seccion.charAt(0).toUpperCase() + seccion.slice(1)}`;
 
-      let titulos = {
-        reincorporarse: "Formulario - Reincorporarse",
-        altoMando: "Formulario - Alto Mando",
-        soporte: "Formulario - Soporte General",
-        reportar: "Formulario - Reportar"
-      };
+      let secciones = ['reincorporarse', 'altoMando', 'soporte', 'reportar'];
+      secciones.forEach(id => {
+        document.getElementById('seccion-' + id).style.display = 'none';
+      });
 
-      formulario.style.display = 'block';
-      titulo.textContent = titulos[seccion];
+      document.getElementById('seccion-' + seccion).style.display = 'block';
     }
   </script>
 </body>
 </html>
+
