@@ -2,63 +2,105 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tickets SAMU</title>
+  <title>MDT - SAMU Metropolitana</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="contenedor">
-    <h1 class="titulo-neon">Sistema de Tickets - SAMU Metropolitana RP</h1>
+    <h1 class="titulo-neon">MDT - SAMU Metropolitana RP</h1>
 
-    <div class="secciones">
-      <button onclick="mostrarFormulario('reincorporarse')" class="btn-seccion azul">Reincorporarse</button>
-      <button onclick="mostrarFormulario('altoMando')" class="btn-seccion morado">Hablar con Alto Mando</button>
-      <button onclick="mostrarFormulario('soporte')" class="btn-seccion verde">Soporte General</button>
-      <button onclick="mostrarFormulario('reportar')" class="btn-seccion rojo">Reportar a SAMU</button>
+    <div id="login">
+      <h2>Identificación del Funcionario</h2>
+      <input type="text" id="nombre" placeholder="Nombre">
+      <input type="text" id="apellido" placeholder="Apellido">
+      <input type="text" id="placa" placeholder="Placa">
+      <button onclick="ingresar()">Ingresar</button>
     </div>
 
-    <div class="formulario" id="formulario">
-      <h2 id="titulo-formulario">Formulario</h2>
-      <form id="ticketForm" action="https://tusitio.com/revisar" method="POST" target="_blank">
-        <input type="text" name="nombre" placeholder="Tu nombre" required>
-        <input type="text" name="usuario" placeholder="Tu usuario de Discord" required>
+    <div id="mdt" style="display: none;">
+      <h2>Formulario del Paciente</h2>
+      <input type="text" id="paciente" placeholder="Nombre del paciente">
+      <input type="text" id="edad" placeholder="Edad">
+      <input type="text" id="diagnostico" placeholder="Diagnóstico">
+      <textarea id="descripcion" placeholder="Descripción de la situación"></textarea>
+      <button onclick="guardarMDT()">Guardar Registro</button>
 
-        <div id="seccion-reincorporarse" class="seccion-dinamica">
-          <textarea name="motivo" placeholder="¿Por qué deseas reincorporarte?" required></textarea>
-        </div>
-
-        <div id="seccion-altoMando" class="seccion-dinamica">
-          <textarea name="asunto" placeholder="¿Qué deseas comunicar al Alto Mando?" required></textarea>
-        </div>
-
-        <div id="seccion-soporte" class="seccion-dinamica">
-          <textarea name="problema" placeholder="Describe tu problema o duda" required></textarea>
-        </div>
-
-        <div id="seccion-reportar" class="seccion-dinamica">
-          <textarea name="reporte" placeholder="¿Qué deseas reportar?" required></textarea>
-        </div>
-
-        <button type="submit" class="btn-enviar">Enviar Informe</button>
-      </form>
+      <h2>Registros Guardados</h2>
+      <div id="registros"></div>
     </div>
   </div>
 
-  <div class="particulas"></div>
-
   <script>
-    function mostrarFormulario(seccion) {
-      document.getElementById('formulario').style.display = 'block';
-      document.getElementById('titulo-formulario').textContent = `Formulario - ${seccion.charAt(0).toUpperCase() + seccion.slice(1)}`;
+    const login = document.getElementById('login');
+    const mdt = document.getElementById('mdt');
+    const registros = document.getElementById('registros');
 
-      let secciones = ['reincorporarse', 'altoMando', 'soporte', 'reportar'];
-      secciones.forEach(id => {
-        document.getElementById('seccion-' + id).style.display = 'none';
+    function ingresar() {
+      const nombre = document.getElementById('nombre').value.trim();
+      const apellido = document.getElementById('apellido').value.trim();
+      const placa = document.getElementById('placa').value.trim();
+
+      if (!nombre || !apellido || !placa) {
+        alert("Completa todos los campos.");
+        return;
+      }
+
+      localStorage.setItem('funcionario', JSON.stringify({ nombre, apellido, placa }));
+      login.style.display = "none";
+      mdt.style.display = "block";
+      mostrarRegistros();
+    }
+
+    function guardarMDT() {
+      const paciente = document.getElementById('paciente').value.trim();
+      const edad = document.getElementById('edad').value.trim();
+      const diagnostico = document.getElementById('diagnostico').value.trim();
+      const descripcion = document.getElementById('descripcion').value.trim();
+      const funcionario = JSON.parse(localStorage.getItem('funcionario'));
+
+      if (!paciente || !edad || !diagnostico || !descripcion) {
+        alert("Completa todos los campos del paciente.");
+        return;
+      }
+
+      const registro = {
+        paciente,
+        edad,
+        diagnostico,
+        descripcion,
+        fecha: new Date().toLocaleString(),
+        funcionario
+      };
+
+      let registrosGuardados = JSON.parse(localStorage.getItem('registrosMDT')) || [];
+      registrosGuardados.push(registro);
+      localStorage.setItem('registrosMDT', JSON.stringify(registrosGuardados));
+
+      mostrarRegistros();
+
+      document.getElementById('paciente').value = '';
+      document.getElementById('edad').value = '';
+      document.getElementById('diagnostico').value = '';
+      document.getElementById('descripcion').value = '';
+    }
+
+    function mostrarRegistros() {
+      const datos = JSON.parse(localStorage.getItem('registrosMDT')) || [];
+      registros.innerHTML = '';
+
+      datos.reverse().forEach(reg => {
+        const div = document.createElement('div');
+        div.classList.add('registro');
+        div.innerHTML = `
+          <strong>Fecha:</strong> ${reg.fecha}<br>
+          <strong>Funcionario:</strong> ${reg.funcionario.nombre} ${reg.funcionario.apellido} - ${reg.funcionario.placa}<br>
+          <strong>Paciente:</strong> ${reg.paciente} (${reg.edad} años)<br>
+          <strong>Diagnóstico:</strong> ${reg.diagnostico}<br>
+          <strong>Descripción:</strong> ${reg.descripcion}
+        `;
+        registros.appendChild(div);
       });
-
-      document.getElementById('seccion-' + seccion).style.display = 'block';
     }
   </script>
 </body>
 </html>
-
