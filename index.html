@@ -1,30 +1,133 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>MDT - Sistema Médico</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MDT SAMU - Sistema de Registro</title>
+<style>
+  body {
+    background: #111;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    position: relative;
+  }
+  .container {
+    max-width: 700px;
+    margin: auto;
+    background: #222;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px #00faff88;
+  }
+  h2 {
+    text-align: center;
+    color: #00faff;
+    margin-bottom: 15px;
+    text-shadow: 0 0 5px #00faff;
+  }
+  input, select, textarea, button {
+    width: 100%;
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 4px;
+    border: none;
+    font-size: 1em;
+  }
+  input, select, textarea {
+    background: #333;
+    color: #eee;
+  }
+  button {
+    background: #00faff;
+    color: #111;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background: #00d1ff;
+  }
+  .resultados ul {
+    list-style: none;
+    padding: 0;
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1px solid #00faff;
+    border-radius: 4px;
+    background: #222;
+  }
+  .resultados li {
+    padding: 10px;
+    border-bottom: 1px solid #00faff44;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #333;
+    margin: 5px;
+    border-radius: 4px;
+  }
+  .li-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1em;
+    margin-bottom: 5px;
+    color: #0ff;
+  }
+  .btn-group {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-group button {
+    background: #0088cc;
+    color: white;
+    padding: 5px 10px;
+    font-size: 0.9em;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-group button:hover {
+    background: #00aaff;
+  }
+  textarea {
+    resize: vertical;
+  }
+</style>
 </head>
 <body>
-  <div id="particles-js"></div>
-
   <div class="container">
-    <!-- LOGIN -->
+
+    <!-- LOGIN SAMU -->
     <div id="loginDiv" class="formulario">
-      <h2>Iniciar Sesión</h2>
+      <h2>Ingreso SAMU - Iniciar Sesión</h2>
       <input type="text" id="loginNombre" placeholder="Nombre" />
       <input type="text" id="loginApellido" placeholder="Apellido" />
+      <input type="text" id="loginPlaca" placeholder="Placa SAMU" />
       <button onclick="iniciarSesion()">Ingresar</button>
     </div>
 
     <!-- FORMULARIO MDT -->
     <div id="mdtDiv" class="formulario" style="display:none;">
-      <h2>Ingreso de Paciente</h2>
+      <h2>Registrar Paciente</h2>
       <p id="usuarioLogueado" style="color:#0ff; font-weight:bold;"></p>
+
       <input type="text" id="pacienteNombre" placeholder="Nombre del Paciente" />
       <input type="text" id="pacienteApellido" placeholder="Apellido del Paciente" />
-      <input type="text" id="pacientePlaca" placeholder="Placa" />
+      <input type="text" id="pacientePlaca" placeholder="Placa del Paciente" />
+      
+      <select id="pacienteRazon">
+        <option value="">Selecciona la razón de atención</option>
+        <option value="Emergencia">Emergencia</option>
+        <option value="Consulta">Consulta</option>
+        <option value="Traslado">Traslado</option>
+        <option value="Otro">Otro</option>
+      </select>
+
+      <textarea id="pacienteObservaciones" placeholder="Observaciones / Detalles" rows="3"></textarea>
+      
       <button onclick="guardarDatos()">Guardar Paciente</button>
       <button onclick="cerrarSesion()" style="background:#f00; margin-top:10px;">Cerrar Sesión</button>
     </div>
@@ -34,149 +137,174 @@
       <h2>Registros MDT</h2>
       <ul id="registrosMDT"></ul>
     </div>
+
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
-  <script>
-    // Partículas
-    tsParticles.load("particles-js", {
-      particles: {
-        number: { value: 60 },
-        size: { value: 4 },
-        color: { value: "#00faff" },
-        move: { enable: true, speed: 2 },
-        line_linked: { enable: true, distance: 100, color: "#fff" }
-      }
-    });
+<script>
+  const admins = ["danilo isaias cuevas ibarra", "jefe samu", "alto mando especial"];
+  let usuarioActual = null;
 
-    const admins = ["danilo isaias cuevas ibarra", "jefe samu", "alto mando especial"];
-    let usuarioActual = null;  // guardaremos objeto {nombre, apellido, fullName}
+  // Iniciar sesión SAMU
+  function iniciarSesion() {
+    const nombre = document.getElementById("loginNombre").value.trim();
+    const apellido = document.getElementById("loginApellido").value.trim();
+    const placa = document.getElementById("loginPlaca").value.trim();
 
-    // Función para iniciar sesión
-    function iniciarSesion() {
-      const nombre = document.getElementById("loginNombre").value.trim();
-      const apellido = document.getElementById("loginApellido").value.trim();
-      if (!nombre || !apellido) {
-        alert("Por favor, ingresa nombre y apellido para iniciar sesión.");
-        return;
-      }
-      usuarioActual = {
-        nombre: nombre,
-        apellido: apellido,
-        fullName: (nombre + " " + apellido).toLowerCase()
-      };
-
-      // Mostrar formulario MDT y ocultar login
-      document.getElementById("loginDiv").style.display = "none";
-      document.getElementById("mdtDiv").style.display = "block";
-
-      // Mostrar nombre del usuario logueado
-      document.getElementById("usuarioLogueado").textContent = `Sesión iniciada como: ${nombre} ${apellido} ${esAdmin() ? "(Admin)" : ""}`;
-
-      mostrarRegistros();
+    if (!nombre || !apellido || !placa) {
+      alert("Completa nombre, apellido y placa para iniciar sesión.");
+      return;
     }
 
-    function cerrarSesion() {
-      usuarioActual = null;
-      document.getElementById("loginDiv").style.display = "block";
-      document.getElementById("mdtDiv").style.display = "none";
-      document.getElementById("registrosMDT").innerHTML = "";
-      document.getElementById("loginNombre").value = "";
-      document.getElementById("loginApellido").value = "";
+    usuarioActual = {
+      nombre,
+      apellido,
+      placa,
+      fullName: (nombre + " " + apellido).toLowerCase()
+    };
+
+    document.getElementById("loginDiv").style.display = "none";
+    document.getElementById("mdtDiv").style.display = "block";
+    mostrarUsuarioLogueado();
+    mostrarRegistros();
+  }
+
+  function cerrarSesion() {
+    usuarioActual = null;
+    document.getElementById("loginDiv").style.display = "block";
+    document.getElementById("mdtDiv").style.display = "none";
+    document.getElementById("registrosMDT").innerHTML = "";
+    limpiarFormularioLogin();
+    limpiarFormularioPaciente();
+  }
+
+  function mostrarUsuarioLogueado() {
+    const texto = `Sesión iniciada como: ${usuarioActual.nombre} ${usuarioActual.apellido} - Placa SAMU: ${usuarioActual.placa} ${esAdmin() ? "(Admin)" : ""}`;
+    document.getElementById("usuarioLogueado").textContent = texto;
+  }
+
+  function esAdmin() {
+    if (!usuarioActual) return false;
+    return admins.includes(usuarioActual.fullName);
+  }
+
+  // Guardar paciente
+  function guardarDatos() {
+    if (!usuarioActual) {
+      alert("Debes iniciar sesión primero.");
+      return;
     }
 
-    // Guardar datos de paciente
-    function guardarDatos() {
-      if (!usuarioActual) {
-        alert("Debes iniciar sesión primero.");
-        return;
-      }
+    const nombre = document.getElementById("pacienteNombre").value.trim();
+    const apellido = document.getElementById("pacienteApellido").value.trim();
+    const placa = document.getElementById("pacientePlaca").value.trim();
+    const razon = document.getElementById("pacienteRazon").value;
+    const observaciones = document.getElementById("pacienteObservaciones").value.trim();
 
-      const nombre = document.getElementById("pacienteNombre").value.trim();
-      const apellido = document.getElementById("pacienteApellido").value.trim();
-      const placa = document.getElementById("pacientePlaca").value.trim();
-
-      if (!nombre || !apellido || !placa) {
-        alert("Completa todos los campos del paciente.");
-        return;
-      }
-
-      const datos = { nombre, apellido, placa, fecha: new Date().toLocaleString() };
-      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
-      registros.push(datos);
-      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
-
-      mostrarRegistros();
-      limpiarFormularioPaciente();
-      alert("Paciente guardado.");
+    if (!nombre || !apellido || !placa || !razon) {
+      alert("Completa todos los campos obligatorios del paciente.");
+      return;
     }
 
-    // Mostrar registros con opciones si admin
-    function mostrarRegistros() {
-      const registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
-      const lista = document.getElementById("registrosMDT");
-      lista.innerHTML = "";
+    const nuevoPaciente = {
+      nombre,
+      apellido,
+      placa,
+      razon,
+      observaciones,
+      fecha: new Date().toLocaleString()
+    };
 
-      registros.forEach((r, i) => {
-        const li = document.createElement("li");
-        li.id = `registro-${i}`;
-        li.innerHTML = `
-          <div class="li-header">
-            <span><strong>${r.nombre} ${r.apellido}</strong> - Placa: <span id="placa-${i}">${r.placa}</span></span>
-            <span><em>${r.fecha}</em></span>
+    let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+    registros.push(nuevoPaciente);
+    localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+
+    mostrarRegistros();
+    limpiarFormularioPaciente();
+    alert("Paciente guardado correctamente.");
+  }
+
+  // Mostrar registros
+  function mostrarRegistros() {
+    const registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+    const lista = document.getElementById("registrosMDT");
+    lista.innerHTML = "";
+
+    registros.forEach((r, i) => {
+      const li = document.createElement("li");
+      li.id = `registro-${i}`;
+      li.innerHTML = `
+        <div class="li-header">
+          <span><strong>${r.nombre} ${r.apellido}</strong> - Placa: <span id="placa-${i}">${r.placa}</span></span>
+          <span><em>${r.fecha}</em></span>
+        </div>
+        <div>
+          Razón: ${r.razon}<br/>
+          Observaciones: ${r.observaciones || "Ninguna"}
+        </div>
+        ${esAdmin() ? `
+          <div class="btn-group">
+            <button onclick="editarPlaca(${i})">Editar Placa</button>
+            <button onclick="editarRazon(${i})">Editar Razón</button>
+            <button onclick="editarObservaciones(${i})">Editar Observaciones</button>
+            <button onclick="borrarRegistro(${i})">Borrar</button>
           </div>
-          ${esAdmin() ? `
-            <div class="btn-group">
-              <button onclick="editarPlaca(${i})">Editar Placa</button>
-              <button onclick="borrarRegistro(${i})">Borrar</button>
-              <button onclick="verDetalles(${i})">Detalles</button>
-              <button onclick="resaltarRegistro(${i})">Resaltar</button>
-            </div>
-          ` : ""}
-        `;
-        lista.appendChild(li);
-      });
-    }
+        ` : ""}
+      `;
+      lista.appendChild(li);
+    });
+  }
 
-    // Funciones admin
-    function borrarRegistro(index) {
-      if (!confirm("¿Seguro que quieres borrar este registro?")) return;
-      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
-      registros.splice(index, 1);
-      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
-      mostrarRegistros();
-    }
+  // Funciones admin para editar/borrar
 
-    function editarPlaca(index) {
-      const nuevaPlaca = prompt("Ingresa nueva placa:");
-      if (!nuevaPlaca) return;
-      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
-      registros[index].placa = nuevaPlaca;
-      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
-      mostrarRegistros();
-    }
+  function borrarRegistro(index) {
+    if (!confirm("¿Seguro que quieres borrar este registro?")) return;
+    let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+    registros.splice(index, 1);
+    localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+    mostrarRegistros();
+  }
 
-    function verDetalles(index) {
-      const registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
-      alert(`Detalles:\nNombre: ${registros[index].nombre}\nApellido: ${registros[index].apellido}\nPlaca: ${registros[index].placa}\nFecha: ${registros[index].fecha}`);
-    }
+  function editarPlaca(index) {
+    const nuevaPlaca = prompt("Ingresa nueva placa del paciente:");
+    if (!nuevaPlaca) return;
+    let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+    registros[index].placa = nuevaPlaca;
+    localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+    mostrarRegistros();
+  }
 
-    function resaltarRegistro(index) {
-      const el = document.getElementById(`registro-${index}`);
-      el.style.background = el.style.background === "yellow" ? "#333" : "yellow";
-    }
+  function editarRazon(index) {
+    const nuevaRazon = prompt("Ingresa nueva razón de atención:", "");
+    if (!nuevaRazon) return;
+    let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+    registros[index].razon = nuevaRazon;
+    localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+    mostrarRegistros();
+  }
 
-    function esAdmin() {
-      if (!usuarioActual) return false;
-      return admins.includes(usuarioActual.fullName);
-    }
+  function editarObservaciones(index) {
+    const nuevasObs = prompt("Edita observaciones:", "");
+    if (nuevasObs === null) return;
+    let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+    registros[index].observaciones = nuevasObs;
+    localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+    mostrarRegistros();
+  }
 
-    function limpiarFormularioPaciente() {
-      document.getElementById("pacienteNombre").value = "";
-      document.getElementById("pacienteApellido").value = "";
-      document.getElementById("pacientePlaca").value = "";
-    }
+  // Limpiar formularios
+  function limpiarFormularioPaciente() {
+    document.getElementById("pacienteNombre").value = "";
+    document.getElementById("pacienteApellido").value = "";
+    document.getElementById("pacientePlaca").value = "";
+    document.getElementById("pacienteRazon").value = "";
+    document.getElementById("pacienteObservaciones").value = "";
+  }
+  function limpiarFormularioLogin() {
+    document.getElementById("loginNombre").value = "";
+    document.getElementById("loginApellido").value = "";
+    document.getElementById("loginPlaca").value = "";
+  }
 
-  </script>
+</script>
 </body>
 </html>
