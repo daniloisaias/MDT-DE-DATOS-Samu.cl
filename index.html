@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket SAMU</title>
+  <link rel="stylesheet" href="ticket.css" />
+</head>
+<body>
+  <div id="particles-js"></div>
+  
+  <div class="container">
+    <h1 class="neon">Soporte SAMU Metropolitana</h1>
+    <form id="ticketForm">
+      <input type="text" id="nombre" placeholder="Tu nombre" required />
+      <input type="text" id="rango" placeholder="Tu rango (Ej: Paramédico)" required />
+      <textarea id="mensaje" placeholder="Describe el problema o situación" required></textarea>
+      <button type="submit">Enviar Informe</button>
+    </form>
+    <p id="confirmacion"></p>
+  </div>
+
+  <!-- Partículas -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+  <script>
+    particlesJS.load('particles-js', 'particles.json');
+  </script>
+
+  <script>
+    document.getElementById('ticketForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value;
+      const rango = document.getElementById('rango').value;
+      const mensaje = document.getElementById('mensaje').value;
+
+      // ENVÍO SIMULADO (puedes usar Webhook o backend real)
+      fetch('https://tusitio.com/altosmandos.html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, rango, mensaje })
+      });
+
+      document.getElementById('confirmacion').textContent = '✅ Ticket enviado con éxito.';
+      document.getElementById('ticketForm').reset();
+    });
+  </script>
+</body>
+</html>
