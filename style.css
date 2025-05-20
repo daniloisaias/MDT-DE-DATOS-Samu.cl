@@ -1,71 +1,142 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
 body {
-  background-color: #121212;
-  color: #fff;
-  font-family: Arial, sans-serif;
+  background: #0d1117;
+  color: #ffffff;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 #particles-js {
   position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   z-index: -1;
 }
 
-.login, .container {
-  background: rgba(0,0,0,0.7);
+.container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
   padding: 20px;
-  margin: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(255,255,255,0.1);
+  flex-wrap: wrap;
 }
 
-input, button {
-  margin: 5px;
-  padding: 8px;
-  border-radius: 5px;
+.formulario,
+.registros,
+.perfil {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  margin: 10px;
+  width: 300px;
+  min-height: 300px;
+}
+
+h2 {
+  margin-bottom: 15px;
+  text-align: center;
+  color: #00faff;
+}
+
+input[type="text"],
+input[type="file"],
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
   border: none;
-  outline: none;
+  border-radius: 8px;
+  background: #1e1e2f;
+  color: #fff;
 }
 
 button {
+  padding: 10px 15px;
+  margin: 5px 0;
+  border: none;
+  border-radius: 8px;
   background: #00faff;
   color: #000;
   cursor: pointer;
-  transition: 0.3s;
+  width: 100%;
+  font-weight: bold;
+  transition: background 0.3s;
 }
 
 button:hover {
-  background: #00c2d3;
-}
-
-#perfil img {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 10px;
+  background: #00b8d4;
 }
 
 ul {
   list-style: none;
-  padding: 0;
+  padding-left: 0;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 ul li {
-  background: rgba(255,255,255,0.1);
-  margin: 5px 0;
+  background: #1e1e2f;
+  margin-bottom: 5px;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 8px;
+  color: #fff;
 }
 
-ul li button {
-  float: right;
-  background: red;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
+.resultados {
+  margin: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  max-width: 95%;
+  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
+}
+
+.resultados h2 {
+  color: #00faff;
+}
+
+.resultados ul li {
+  background: #252530;
+  border-left: 5px solid #00faff;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.perfil {
+  text-align: center;
+}
+
+.perfil img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid #00faff;
+  margin-bottom: 10px;
+  object-fit: cover;
+}
+
+.perfil button {
+  margin-top: 10px;
+  width: auto;
+}
+
+.perfil span {
+  display: block;
+  font-size: 18px;
+  margin: 5px 0;
+  color: #00faff;
+}
+
+.admin {
+  border: 2px solid #ff0;
+  box-shadow: 0 0 10px #ff0;
 }
