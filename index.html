@@ -1,106 +1,97 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>MDT - SAMU Metropolitana</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>MDT - Sistema Médico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="contenedor">
-    <h1 class="titulo-neon">MDT - SAMU Metropolitana RP</h1>
+  <div id="particles-js"></div>
 
-    <div id="login">
-      <h2>Identificación del Funcionario</h2>
-      <input type="text" id="nombre" placeholder="Nombre">
-      <input type="text" id="apellido" placeholder="Apellido">
-      <input type="text" id="placa" placeholder="Placa">
-      <button onclick="ingresar()">Ingresar</button>
+  <div class="container">
+    <div class="formulario">
+      <h2>Ingreso MDT</h2>
+      <input type="text" id="nombre" placeholder="Nombre" />
+      <input type="text" id="apellido" placeholder="Apellido" />
+      <input type="text" id="placa" placeholder="Placa" />
+      <button onclick="guardarDatos()">Guardar</button>
     </div>
 
-    <div id="mdt" style="display: none;">
-      <h2>Formulario del Paciente</h2>
-      <input type="text" id="paciente" placeholder="Nombre del paciente">
-      <input type="text" id="edad" placeholder="Edad">
-      <input type="text" id="diagnostico" placeholder="Diagnóstico">
-      <textarea id="descripcion" placeholder="Descripción de la situación"></textarea>
-      <button onclick="guardarMDT()">Guardar Registro</button>
-
-      <h2>Registros Guardados</h2>
-      <div id="registros"></div>
+    <div class="registros">
+      <h2>Usuarios Registrados</h2>
+      <ul id="listaUsuarios"></ul>
     </div>
   </div>
 
+  <div class="resultados">
+    <h2>Registros MDT</h2>
+    <ul id="registrosMDT"></ul>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
   <script>
-    const login = document.getElementById('login');
-    const mdt = document.getElementById('mdt');
-    const registros = document.getElementById('registros');
-
-    function ingresar() {
-      const nombre = document.getElementById('nombre').value.trim();
-      const apellido = document.getElementById('apellido').value.trim();
-      const placa = document.getElementById('placa').value.trim();
-
-      if (!nombre || !apellido || !placa) {
-        alert("Completa todos los campos.");
-        return;
+    // Partículas
+    tsParticles.load("particles-js", {
+      particles: {
+        number: { value: 60 },
+        size: { value: 4 },
+        color: { value: "#00faff" },
+        move: { enable: true, speed: 2 },
+        line_linked: { enable: true, distance: 100, color: "#fff" }
       }
+    });
 
-      localStorage.setItem('funcionario', JSON.stringify({ nombre, apellido, placa }));
-      login.style.display = "none";
-      mdt.style.display = "block";
-      mostrarRegistros();
-    }
+    const admins = ["Director General", "Jefe SAMU", "Alto Mando Especial"];
 
-    function guardarMDT() {
-      const paciente = document.getElementById('paciente').value.trim();
-      const edad = document.getElementById('edad').value.trim();
-      const diagnostico = document.getElementById('diagnostico').value.trim();
-      const descripcion = document.getElementById('descripcion').value.trim();
-      const funcionario = JSON.parse(localStorage.getItem('funcionario'));
+    function guardarDatos() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const apellido = document.getElementById("apellido").value.trim();
+      const placa = document.getElementById("placa").value.trim();
+      if (!nombre || !apellido || !placa) return;
 
-      if (!paciente || !edad || !diagnostico || !descripcion) {
-        alert("Completa todos los campos del paciente.");
-        return;
-      }
+      const datos = { nombre, apellido, placa, fecha: new Date().toLocaleString() };
 
-      const registro = {
-        paciente,
-        edad,
-        diagnostico,
-        descripcion,
-        fecha: new Date().toLocaleString(),
-        funcionario
-      };
-
-      let registrosGuardados = JSON.parse(localStorage.getItem('registrosMDT')) || [];
-      registrosGuardados.push(registro);
-      localStorage.setItem('registrosMDT', JSON.stringify(registrosGuardados));
+      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      registros.push(datos);
+      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
 
       mostrarRegistros();
-
-      document.getElementById('paciente').value = '';
-      document.getElementById('edad').value = '';
-      document.getElementById('diagnostico').value = '';
-      document.getElementById('descripcion').value = '';
+      mostrarUsuarios();
     }
 
     function mostrarRegistros() {
-      const datos = JSON.parse(localStorage.getItem('registrosMDT')) || [];
-      registros.innerHTML = '';
+      const registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      const lista = document.getElementById("registrosMDT");
+      lista.innerHTML = "";
 
-      datos.reverse().forEach(reg => {
-        const div = document.createElement('div');
-        div.classList.add('registro');
-        div.innerHTML = `
-          <strong>Fecha:</strong> ${reg.fecha}<br>
-          <strong>Funcionario:</strong> ${reg.funcionario.nombre} ${reg.funcionario.apellido} - ${reg.funcionario.placa}<br>
-          <strong>Paciente:</strong> ${reg.paciente} (${reg.edad} años)<br>
-          <strong>Diagnóstico:</strong> ${reg.diagnostico}<br>
-          <strong>Descripción:</strong> ${reg.descripcion}
+      registros.forEach((r, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <strong>${r.nombre} ${r.apellido}</strong> - Placa: ${r.placa} - <em>${r.fecha}</em>
+          ${r.nombre === nombreAdmin ? `<button onclick="borrarRegistro(${i})">🗑️</button>` : ""}
         `;
-        registros.appendChild(div);
+        lista.appendChild(li);
       });
     }
+
+    function mostrarUsuarios() {
+      const registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      const lista = document.getElementById("listaUsuarios");
+      const nombresUnicos = [...new Set(registros.map(r => r.nombre + " " + r.apellido))];
+      lista.innerHTML = nombresUnicos.map(n => `<li>${n}</li>`).join("");
+    }
+
+    function borrarRegistro(index) {
+      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      registros.splice(index, 1);
+      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+      mostrarRegistros();
+      mostrarUsuarios();
+    }
+
+    mostrarRegistros();
+    mostrarUsuarios();
   </script>
 </body>
 </html>
