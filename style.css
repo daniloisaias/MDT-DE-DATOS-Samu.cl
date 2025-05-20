@@ -1,111 +1,64 @@
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(to right, #000428, #004e92);
-  color: white;
-  overflow-x: hidden;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+  background: radial-gradient(circle at top, #000428, #004e92);
+  color: #fff;
+  animation: fondo 10s ease infinite alternate;
+}
+
+@keyframes fondo {
+  0% { background: #0f0c29; }
+  50% { background: #302b63; }
+  100% { background: #24243e; }
+}
+
+.contenedor {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
 }
 
 .titulo-neon {
   text-align: center;
-  font-size: 3rem;
-  margin-top: 30px;
-  color: #00ffff;
-  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+  font-size: 2.5em;
+  color: #00f0ff;
+  text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+  margin-bottom: 30px;
 }
 
-.contenedor {
-  padding: 30px;
-  text-align: center;
-}
-
-.secciones {
-  margin-top: 20px;
-}
-
-.btn-seccion {
-  padding: 15px 25px;
-  margin: 10px;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  border-radius: 10px;
-  transition: transform 0.3s ease, box-shadow 0.3s;
-  box-shadow: 0 0 15px #fff;
-}
-
-.btn-seccion:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 25px white;
-}
-
-.azul { background: #007bff; }
-.morado { background: #8e44ad; }
-.verde { background: #28a745; }
-.rojo { background: #e74c3c; }
-
-.formulario {
-  margin-top: 30px;
-  animation: aparecer 0.8s ease;
-  display: none;
-}
-
-form input, form textarea {
+input, textarea, button {
   display: block;
-  width: 90%;
-  max-width: 500px;
-  margin: 10px auto;
-  padding: 12px;
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border: none;
   border-radius: 8px;
-  border: none;
-  font-size: 1rem;
+  font-size: 1em;
 }
 
-textarea {
-  height: 120px;
+input, textarea {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
-.btn-enviar {
-  padding: 12px 30px;
-  background: #00ffe0;
+button {
+  background: #00f0ff;
   color: #000;
-  border: none;
-  border-radius: 10px;
-  font-size: 1.2rem;
+  font-weight: bold;
   cursor: pointer;
-  margin-top: 10px;
-  box-shadow: 0 0 20px #00ffe0;
-  transition: background 0.3s;
+  transition: 0.3s ease;
 }
 
-.btn-enviar:hover {
-  background: #00c4ff;
+button:hover {
+  background: #00d8ff;
+  transform: scale(1.05);
 }
 
-.seccion-dinamica {
-  display: none;
-  margin-top: 20px;
-}
-
-/* Animación */
-@keyframes aparecer {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Partículas decorativas */
-.particulas::before, .particulas::after {
-  content: "";
-  position: fixed;
-  width: 12px;
-  height: 12px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  animation: flotar 6s infinite ease-in-out;
-}
-
-@keyframes flotar {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-30px); }
-  100% { transform: translateY(0); }
+.registro {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  margin: 10px 0;
+  border-left: 4px solid #00f0ff;
+  border-radius: 6px;
 }
