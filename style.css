@@ -1,158 +1,101 @@
-* {
+body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
-}
-
-body {
-  background: #0d1117;
-  color: #ffffff;
-  overflow-x: hidden;
-  min-height: 100vh;
-  transition: background 0.3s, color 0.3s;
-}
-
-/* Partículas */
-#particles-js {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-/* Contenedor principal */
-.container {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  padding: 20px;
-  flex-wrap: wrap;
-}
-
-.formulario,
-.registros,
-.perfil,
-.resultados {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  margin: 10px;
-  width: 300px;
-  min-height: 300px;
-}
-
-/* Títulos */
-h2 {
-  margin-bottom: 15px;
-  text-align: center;
-  color: #00faff;
-}
-
-/* Inputs y botones */
-input[type="text"],
-input[type="file"],
-select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 12px;
-  border: none;
-  border-radius: 8px;
-  background: #1e1e2f;
-  color: #fff;
-}
-
-button {
-  padding: 10px 15px;
-  margin: 5px 0;
-  border: none;
-  border-radius: 8px;
-  background: #00faff;
-  color: #000;
-  cursor: pointer;
-  width: 100%;
-  font-weight: bold;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  color: white;
   transition: background 0.3s;
 }
 
-button:hover {
-  background: #00b8d4;
+.theme-light {
+  background: #f0f0f0;
+  color: #111;
 }
 
-/* Botón de cerrar sesión */
-button.logout {
-  background: #ff4f4f;
+.container {
+  max-width: 600px;
+  margin: 100px auto;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px 16px;
+  margin: 10px 5px 0 0;
+  border: none;
+  border-radius: 8px;
+  background-color: #00faff;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #02baba;
+}
+
+.logout {
+  background-color: red;
   color: white;
 }
-button.logout:hover {
-  background: #d73737;
+
+.logout:hover {
+  background-color: darkred;
 }
 
-/* Lista de registros */
-ul {
+.registros ul {
   list-style: none;
-  padding-left: 0;
-  max-height: 200px;
-  overflow-y: auto;
+  padding: 0;
 }
 
-ul li {
-  background: #1e1e2f;
-  margin-bottom: 5px;
-  padding: 10px;
-  border-radius: 8px;
-  color: #fff;
-}
-
-/* Panel de resultados */
-.resultados {
-  margin: 20px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  max-width: 95%;
-  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.1);
-}
-
-.resultados ul li {
-  background: #252530;
-  border-left: 5px solid #00faff;
+.registros li {
+  background: rgba(255, 255, 255, 0.1);
   margin-bottom: 10px;
-  padding: 12px;
+  padding: 10px;
   border-radius: 10px;
 }
 
-/* Perfil */
+.admin-border {
+  border: 2px solid gold;
+}
+
 .profile-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  text-align: right;
-  z-index: 10;
+  position: absolute;
+  top: 15px;
+  right: 15px;
 }
 
 .profile-pic {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  border: 3px solid #00faff;
   cursor: pointer;
-  object-fit: cover;
+  border: 2px solid #00faff;
 }
 
 .dropdown {
   display: none;
   position: absolute;
+  top: 60px;
   right: 0;
-  margin-top: 10px;
-  background: #1e1e2f;
-  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
   border-radius: 10px;
-  width: 200px;
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
-  text-align: left;
+  padding: 10px;
+  z-index: 99;
+  width: 160px;
 }
 
 .dropdown.active {
@@ -160,49 +103,17 @@ ul li {
 }
 
 .dropdown button {
+  display: block;
   width: 100%;
+  text-align: left;
   margin: 5px 0;
-  padding: 8px 10px;
-  font-size: 14px;
 }
 
-/* Admin */
-.admin-border {
-  border: 2px solid gold;
-  box-shadow: 0 0 10px gold;
-}
-
-/* Temas */
-.theme-dark {
-  background: #0d1117;
-  color: white;
-}
-
-.theme-light {
-  background: #f5f5f5;
-  color: black;
-}
-
-.theme-light .formulario,
-.theme-light .registros,
-.theme-light .perfil,
-.theme-light .resultados,
-.theme-light .dropdown {
-  background: rgba(0, 0, 0, 0.05);
-  color: black;
-}
-
-.theme-light input,
-.theme-light select {
-  background: #ddd;
-  color: #000;
-}
-
-.theme-light button {
-  background: #00b8d4;
-  color: #fff;
-}
-
-.theme-light button.logout {
-  background: #e53935;
+#particles-js {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  top: 0;
+  left: 0;
 }
