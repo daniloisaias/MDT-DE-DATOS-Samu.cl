@@ -3,118 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <title>MDT - Sistema Médico</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      background: #111;
-      color: #eee;
-      font-family: Arial, sans-serif;
-      margin: 0; padding: 20px;
-      min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-    }
-    #particles-js {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      z-index: -1;
-      background: #111;
-    }
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: #222;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 15px #00faff88;
-    }
-    input, textarea, button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 4px;
-      border: none;
-      font-size: 1em;
-    }
-    textarea {
-      resize: vertical;
-      height: 80px;
-    }
-    button {
-      background: #00faff;
-      color: #111;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0088cc;
-      color: #fff;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      max-height: 250px;
-      overflow-y: auto;
-    }
-    li {
-      background: #333;
-      margin-bottom: 10px;
-      padding: 12px;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-    }
-    .li-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-    .btn-group button {
-      margin-left: 6px;
-      padding: 6px 10px;
-      font-size: 0.9em;
-      border-radius: 4px;
-    }
-    .hidden {
-      display: none;
-    }
-    .admin-badge {
-      color: #0ff;
-      font-weight: bold;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="particles-js"></div>
+
   <div class="container">
-
-    <!-- LOGIN -->
-    <div id="loginDiv">
-      <h2>Iniciar Sesión MDT</h2>
-      <input type="text" id="inputNombre" placeholder="Nombre" />
-      <input type="text" id="inputApellido" placeholder="Apellido" />
-      <button id="btnLogin">Ingresar</button>
-      <p id="loginError" style="color:#f55;"></p>
+    <div class="formulario">
+      <h2>Ingreso MDT</h2>
+      <input type="text" id="nombre" placeholder="Nombre" />
+      <input type="text" id="apellido" placeholder="Apellido" />
+      <input type="text" id="placa" placeholder="Placa" />
+      <button onclick="guardarDatos()">Guardar</button>
     </div>
 
-    <!-- PANEL USUARIO -->
-    <div id="panelUsuario" class="hidden">
-      <h2>Bienvenido <span id="nombreUsuario"></span> <span id="adminBadge" class="admin-badge hidden">(Admin)</span></h2>
-
-      <!-- Formulario para agregar registro -->
-      <h3>Agregar registro de paciente</h3>
-      <textarea id="datosPaciente" placeholder="Datos del paciente..."></textarea>
-      <button id="btnAgregarRegistro">Agregar Registro</button>
-
-      <!-- Lista de registros -->
-      <h3>Registros MDT</h3>
-      <ul id="listaRegistros"></ul>
+    <div class="registros">
+      <h2>Usuarios Registrados</h2>
+      <ul id="listaUsuarios"></ul>
     </div>
+  </div>
 
+  <div class="resultados">
+    <h2>Registros MDT</h2>
+    <ul id="registrosMDT"></ul>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
@@ -130,150 +42,113 @@
       }
     });
 
-    // Admins (nombres completos en minúsculas)
     const admins = ["danilo isaias cuevas ibarra", "jefe samu", "alto mando especial"];
+    let usuarioActual = "";
 
-    // Variables globales
-    let usuarioActual = null;
-    let esAdmin = false;
-
-    // DOM Elements
-    const loginDiv = document.getElementById("loginDiv");
-    const panelUsuario = document.getElementById("panelUsuario");
-    const inputNombre = document.getElementById("inputNombre");
-    const inputApellido = document.getElementById("inputApellido");
-    const btnLogin = document.getElementById("btnLogin");
-    const nombreUsuarioSpan = document.getElementById("nombreUsuario");
-    const adminBadge = document.getElementById("adminBadge");
-    const loginError = document.getElementById("loginError");
-
-    const datosPaciente = document.getElementById("datosPaciente");
-    const btnAgregarRegistro = document.getElementById("btnAgregarRegistro");
-    const listaRegistros = document.getElementById("listaRegistros");
-
-    // Función para iniciar sesión
-    btnLogin.onclick = () => {
-      const nombre = inputNombre.value.trim();
-      const apellido = inputApellido.value.trim();
-      if (!nombre || !apellido) {
-        loginError.textContent = "Por favor ingresa nombre y apellido.";
+    function guardarDatos() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const apellido = document.getElementById("apellido").value.trim();
+      const placa = document.getElementById("placa").value.trim();
+      if (!nombre || !apellido || !placa) {
+        alert("Completa todos los campos.");
         return;
       }
-      loginError.textContent = "";
-      usuarioActual = `${nombre.toLowerCase()} ${apellido.toLowerCase()}`;
-      esAdmin = admins.includes(usuarioActual);
-      mostrarPanelUsuario(nombre, apellido);
-    };
 
-    function mostrarPanelUsuario(nombre, apellido) {
-      loginDiv.classList.add("hidden");
-      panelUsuario.classList.remove("hidden");
-      nombreUsuarioSpan.textContent = `${nombre} ${apellido}`;
-      adminBadge.classList.toggle("hidden", !esAdmin);
-      cargarRegistros();
+      usuarioActual = `${nombre.toLowerCase()} ${apellido.toLowerCase()}`;
+
+      const datos = { nombre, apellido, placa, fecha: new Date().toLocaleString() };
+      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+
+      // Si usuario ya existe, actualizar su placa
+      const index = registros.findIndex(r => 
+        r.nombre.toLowerCase() === nombre.toLowerCase() && 
+        r.apellido.toLowerCase() === apellido.toLowerCase());
+      if (index !== -1) {
+        registros[index] = datos;
+      } else {
+        registros.push(datos);
+      }
+
+      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+      mostrarRegistros();
+      mostrarUsuarios();
+      limpiarFormulario();
+      alert("Datos guardados correctamente.");
     }
 
-    // Guardar registro
-    btnAgregarRegistro.onclick = () => {
-      const texto = datosPaciente.value.trim();
-      if (!texto) return alert("Debes ingresar los datos del paciente.");
+    function mostrarRegistros() {
+      const registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      const lista = document.getElementById("registrosMDT");
+      lista.innerHTML = "";
 
-      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
-      registros.push({
-        nombreUsuario: usuarioActual,
-        datosPaciente: texto,
-        fecha: new Date().toLocaleString(),
-        id: Date.now(),
-        placa: "",
-      });
-      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
-      datosPaciente.value = "";
-      cargarRegistros();
-    };
-
-    // Cargar y mostrar registros
-    function cargarRegistros() {
-      listaRegistros.innerHTML = "";
-      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
-
-      registros.forEach((reg, i) => {
+      registros.forEach((r, i) => {
         const li = document.createElement("li");
-
-        // Mostrar datos del paciente
+        li.id = `registro-${i}`;
         li.innerHTML = `
           <div class="li-header">
-            <div>
-              <strong>Paciente:</strong> ${reg.datosPaciente}<br/>
-              <small>Registrado por: ${reg.nombreUsuario} - Fecha: ${reg.fecha}</small>
-            </div>
-            <div class="btn-group"></div>
+            <span><strong>${r.nombre} ${r.apellido}</strong> - Placa: <span id="placa-${i}">${r.placa}</span></span>
+            <span><em>${r.fecha}</em></span>
           </div>
+          ${esAdmin() ? `
+            <div class="btn-group">
+              <button onclick="editarPlaca(${i})">Editar Placa</button>
+              <button onclick="borrarRegistro(${i})">Borrar</button>
+              <button onclick="verDetalles(${i})">Detalles</button>
+              <button onclick="resaltarRegistro(${i})">Resaltar</button>
+            </div>
+          ` : ""}
         `;
-
-        // Si es admin, agregamos botones extra
-        if (esAdmin) {
-          const btnGroup = li.querySelector(".btn-group");
-
-          // Botón borrar
-          const btnBorrar = document.createElement("button");
-          btnBorrar.textContent = "Borrar";
-          btnBorrar.onclick = () => {
-            if (confirm("¿Seguro quieres borrar este registro?")) {
-              borrarRegistro(reg.id);
-            }
-          };
-          btnGroup.appendChild(btnBorrar);
-
-          // Botón editar placa
-          const btnEditarPlaca = document.createElement("button");
-          btnEditarPlaca.textContent = "Editar Placa";
-          btnEditarPlaca.onclick = () => {
-            const nuevaPlaca = prompt("Ingrese nueva placa:", reg.placa || "");
-            if (nuevaPlaca !== null) {
-              editarPlaca(reg.id, nuevaPlaca);
-            }
-          };
-          btnGroup.appendChild(btnEditarPlaca);
-
-          // Botón resetear placa
-          const btnResetPlaca = document.createElement("button");
-          btnResetPlaca.textContent = "Resetear Placa";
-          btnResetPlaca.onclick = () => {
-            if (confirm("¿Resetear placa a vacía?")) {
-              editarPlaca(reg.id, "");
-            }
-          };
-          btnGroup.appendChild(btnResetPlaca);
-
-          // Mostrar placa actual
-          const placaSpan = document.createElement("div");
-          placaSpan.style.marginTop = "6px";
-          placaSpan.innerHTML = `<strong>Placa:</strong> ${reg.placa || "(ninguna)"}`;
-          li.appendChild(placaSpan);
-        }
-
-        listaRegistros.appendChild(li);
+        lista.appendChild(li);
       });
     }
 
-    // Función borrar registro por ID
-    function borrarRegistro(id) {
-      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
-      registros = registros.filter(r => r.id !== id);
-      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
-      cargarRegistros();
+    function mostrarUsuarios() {
+      const registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      const lista = document.getElementById("listaUsuarios");
+      const nombresUnicos = [...new Set(registros.map(r => r.nombre + " " + r.apellido))];
+      lista.innerHTML = nombresUnicos.map(n => `<li>${n}</li>`).join("");
     }
 
-    // Función editar placa por ID
-    function editarPlaca(id, nuevaPlaca) {
+    function borrarRegistro(index) {
+      if (!confirm("¿Seguro que quieres borrar este registro?")) return;
       let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
-      const reg = registros.find(r => r.id === id);
-      if (reg) {
-        reg.placa = nuevaPlaca;
-        localStorage.setItem("mdtRegistros", JSON.stringify(registros));
-        cargarRegistros();
-      }
+      registros.splice(index, 1);
+      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+      mostrarRegistros();
+      mostrarUsuarios();
     }
+
+    function editarPlaca(index) {
+      const nuevaPlaca = prompt("Ingresa nueva placa:");
+      if (!nuevaPlaca) return;
+      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      registros[index].placa = nuevaPlaca;
+      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+      mostrarRegistros();
+    }
+
+    function verDetalles(index) {
+      const registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      alert(`Detalles:\nNombre: ${registros[index].nombre}\nApellido: ${registros[index].apellido}\nPlaca: ${registros[index].placa}\nFecha: ${registros[index].fecha}`);
+    }
+
+    function resaltarRegistro(index) {
+      const el = document.getElementById(`registro-${index}`);
+      el.style.background = el.style.background === "yellow" ? "#333" : "yellow";
+    }
+
+    function esAdmin() {
+      return admins.includes(usuarioActual.toLowerCase());
+    }
+
+    function limpiarFormulario() {
+      document.getElementById("nombre").value = "";
+      document.getElementById("apellido").value = "";
+      document.getElementById("placa").value = "";
+    }
+
+    mostrarRegistros();
+    mostrarUsuarios();
   </script>
 </body>
 </html>
