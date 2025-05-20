@@ -28,7 +28,7 @@ body {
   box-shadow: 0 0 15px #00faff88;
 }
 
-.formulario h2, .registros h2, .resultados h2 {
+.formulario h2, .resultados h2 {
   text-align: center;
   color: #00faff;
   margin-bottom: 15px;
@@ -54,54 +54,57 @@ button {
   color: #111;
   cursor: pointer;
   font-weight: bold;
-  transition: background 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background: #0088cc;
-  color: #fff;
+  background: #00d1ff;
 }
 
-ul {
+.resultados ul {
   list-style: none;
   padding: 0;
-  margin: 0;
-  max-height: 300px;
+  max-height: 350px;
   overflow-y: auto;
+  border: 1px solid #00faff;
+  border-radius: 4px;
+  background: #222;
 }
 
-li {
-  background: #333;
-  margin-bottom: 10px;
-  padding: 12px;
-  border-radius: 6px;
+.resultados li {
+  padding: 10px;
+  border-bottom: 1px solid #00faff44;
   display: flex;
   flex-direction: column;
-  transition: background 0.3s;
+  justify-content: space-between;
+  background: #333;
+  margin: 5px;
+  border-radius: 4px;
 }
 
 .li-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  margin-bottom: 6px;
-  color: #00faff;
+  font-size: 1em;
+  margin-bottom: 5px;
+  color: #0ff;
+}
+
+.btn-group {
+  display: flex;
+  gap: 8px;
 }
 
 .btn-group button {
-  margin-left: 6px;
-  padding: 6px 10px;
+  background: #0088cc;
+  color: white;
+  padding: 5px 10px;
   font-size: 0.9em;
-  border-radius: 4px;
-  background: #005577;
-  color: #aaffff;
+  border-radius: 3px;
   border: none;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
 .btn-group button:hover {
   background: #00aaff;
-  color: #111;
 }
