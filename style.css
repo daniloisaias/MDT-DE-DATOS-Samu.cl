@@ -1,64 +1,87 @@
 body {
   margin: 0;
-  padding: 0;
   font-family: 'Arial', sans-serif;
-  background: radial-gradient(circle at top, #000428, #004e92);
+  background: #111;
   color: #fff;
-  animation: fondo 10s ease infinite alternate;
+  overflow-x: hidden;
 }
 
-@keyframes fondo {
-  0% { background: #0f0c29; }
-  50% { background: #302b63; }
-  100% { background: #24243e; }
-}
-
-.contenedor {
-  max-width: 800px;
-  margin: auto;
-  padding: 20px;
-}
-
-.titulo-neon {
-  text-align: center;
-  font-size: 2.5em;
-  color: #00f0ff;
-  text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
-  margin-bottom: 30px;
-}
-
-input, textarea, button {
-  display: block;
+#particles-js {
+  position: fixed;
   width: 100%;
-  margin: 10px 0;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1em;
+  height: 100%;
+  z-index: -1;
 }
 
-input, textarea {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+.container {
+  display: flex;
+  justify-content: space-around;
+  padding: 40px 20px;
+  flex-wrap: wrap;
+}
+
+.formulario, .registros {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px cyan;
+  width: 300px;
+  margin: 10px;
+  animation: aparecer 1s ease-in-out;
+}
+
+.resultados {
+  padding: 20px;
+  text-align: center;
+  animation: aparecer 1s ease-in-out;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
 }
 
 button {
-  background: #00f0ff;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s ease;
-}
-
-button:hover {
-  background: #00d8ff;
-  transform: scale(1.05);
-}
-
-.registro {
-  background: rgba(255, 255, 255, 0.05);
+  margin-top: 15px;
   padding: 10px;
-  margin: 10px 0;
-  border-left: 4px solid #00f0ff;
-  border-radius: 6px;
+  background: cyan;
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  cursor: pointer;
+  font-weight: bold;
 }
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-top: 10px;
+  background: rgba(255,255,255,0.1);
+  padding: 10px;
+  border-radius: 10px;
+  position: relative;
+}
+
+li button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
