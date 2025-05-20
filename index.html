@@ -42,7 +42,8 @@
       }
     });
 
-    const admins = ["Danilo Isaias Cuevas Ibarra", "Jefe SAMU", "Alto Mando Especial"];
+    const admins = ["danilo isaias cuevas ibarra", "Jefe SAMU", "Alto Mando Especial"];
+    let usuarioActual = "";
 
     function guardarDatos() {
       const nombre = document.getElementById("nombre").value.trim();
@@ -50,8 +51,9 @@
       const placa = document.getElementById("placa").value.trim();
       if (!nombre || !apellido || !placa) return;
 
-      const datos = { nombre, apellido, placa, fecha: new Date().toLocaleString() };
+      usuarioActual = `${nombre.toLowerCase()} ${apellido.toLowerCase()}`;
 
+      const datos = { nombre, apellido, placa, fecha: new Date().toLocaleString() };
       let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
       registros.push(datos);
       localStorage.setItem("mdtRegistros", JSON.stringify(registros));
@@ -68,9 +70,15 @@
       registros.forEach((r, i) => {
         const li = document.createElement("li");
         li.innerHTML = `
-          <strong>${r.nombre} ${r.apellido}</strong> - Placa: ${r.placa} - <em>${r.fecha}</em>
-          ${r.nombre === nombreAdmin ? `<button onclick="borrarRegistro(${i})">🗑️</button>` : ""}
+          <strong>${r.nombre} ${r.apellido}</strong> - Placa: <span id="placa-${i}">${r.placa}</span> - <em>${r.fecha}</em>
+          ${esAdmin() ? `
+            <button onclick="editarPlaca(${i})">Editar Placa</button>
+            <button onclick="borrarRegistro(${i})">Borrar</button>
+            <button onclick="verDetalles(${i})">Detalles</button>
+            <button onclick="resaltarRegistro(${i})">Resaltar</button>
+          ` : ""}
         `;
+        li.id = `registro-${i}`;
         lista.appendChild(li);
       });
     }
@@ -88,6 +96,28 @@
       localStorage.setItem("mdtRegistros", JSON.stringify(registros));
       mostrarRegistros();
       mostrarUsuarios();
+    }
+
+    function editarPlaca(index) {
+      const nuevaPlaca = prompt("Nueva placa:");
+      if (!nuevaPlaca) return;
+      let registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      registros[index].placa = nuevaPlaca;
+      localStorage.setItem("mdtRegistros", JSON.stringify(registros));
+      mostrarRegistros();
+    }
+
+    function verDetalles(index) {
+      const registros = JSON.parse(localStorage.getItem("mdtRegistros")) || [];
+      alert(`Detalles:\nNombre: ${registros[index].nombre}\nApellido: ${registros[index].apellido}\nPlaca: ${registros[index].placa}\nFecha: ${registros[index].fecha}`);
+    }
+
+    function resaltarRegistro(index) {
+      document.getElementById(`registro-${index}`).style.background = "#ff0";
+    }
+
+    function esAdmin() {
+      return admins.includes(usuarioActual.toLowerCase());
     }
 
     mostrarRegistros();
