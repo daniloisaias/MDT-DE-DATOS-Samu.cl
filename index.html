@@ -1,155 +1,319 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>MDT SAMU - Sistema Médico</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MDT SAMU Roleplay</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="particles-js"></div>
 
-  <!-- PERFIL ARRIBA A LA DERECHA -->
-  <div class="profile-container">
-    <img src="https://via.placeholder.com/50" class="profile-pic" id="profilePic" />
-    <div class="dropdown" id="profileDropdown">
-      <button onclick="cambiarColor()">Cambiar Color</button>
-      <button onclick="modoBajoConsumo()">Modo Bajo Consumo</button>
-      <button class="logout" onclick="cerrarSesion()">Cerrar Sesión</button>
-    </div>
+<div id="particles-js"></div>
+
+<div class="container">
+
+  <div id="login-section" class="box">
+    <h2>Iniciar Sesión (Placa SAMU)</h2>
+    <input id="input-placa" placeholder="Ingrese su placa SAMU" />
+    <button id="btn-login">Iniciar Sesión</button>
+    <p id="login-error" class="error-msg"></p>
   </div>
 
-  <div class="container">
-    <div id="loginForm">
-      <h2>Iniciar Sesión</h2>
-      <input type="text" id="nombreUsuario" placeholder="Nombre completo" />
-      <button onclick="iniciarSesion()">Entrar</button>
-    </div>
+  <div id="main-app" class="hidden">
 
-    <div id="formularioPaciente" style="display:none">
-      <h2>Formulario SAMU</h2>
-      <input type="text" id="pacienteNombre" placeholder="Nombre del paciente" />
-      <input type="text" id="pacienteApellido" placeholder="Apellido del paciente" />
-      <input type="text" id="pacienteRazon" placeholder="Razón / Diagnóstico" />
-      <input type="text" id="pacientePlaca" placeholder="Placa SAMU" />
-      <button onclick="guardarPaciente()">Guardar</button>
-    </div>
+    <header>
+      <div id="profile" title="Perfil">
+        <img id="profile-img" src="https://i.pravatar.cc/50" alt="Foto perfil" />
+        <div id="profile-menu" class="hidden">
+          <button id="btn-cambiar-img">Cambiar Imagen</button>
+          <button id="btn-toggle-modo">Modo Bajo Consumo</button>
+          <button id="btn-personalizar-colores">Personalizar Colores</button>
+          <button id="btn-cerrar-sesion" class="btn-danger">Cerrar Sesión</button>
+        </div>
+      </div>
+      <h1>Bienvenido, <span id="user-placa"></span></h1>
+    </header>
 
-    <div class="registros">
-      <h2>Registros Guardados</h2>
-      <ul id="listaPacientes"></ul>
-    </div>
+    <section id="registro-paciente" class="box">
+      <h2>Registrar Paciente</h2>
+      <input id="paciente-nombre" placeholder="Nombre Paciente" />
+      <input id="paciente-apellido" placeholder="Apellido Paciente" />
+      <input id="paciente-razon" placeholder="Razón / Motivo" />
+      <button id="btn-guardar-paciente">Guardar Paciente</button>
+    </section>
+
+    <section id="lista-usuarios" class="box hidden">
+      <h2>Usuarios SAMU Registrados</h2>
+      <ul id="usuarios-lista"></ul>
+    </section>
+
+    <section id="pacientes-registrados" class="box">
+      <h2>Pacientes Registrados</h2>
+      <ul id="pacientes-lista"></ul>
+    </section>
+
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
-  <script>
-    // PARTÍCULAS
-    tsParticles.load("particles-js", {
-      particles: {
-        number: { value: 60 },
-        size: { value: 4 },
-        color: { value: "#00faff" },
-        move: { enable: true, speed: 2 },
-        line_linked: { enable: true, distance: 100, color: "#fff" }
-      }
+  <input type="file" id="file-input" accept="image/*" style="display:none" />
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+<script>
+  // Partículas en fondo
+  tsParticles.load("particles-js", {
+    particles: {
+      number: { value: 60 },
+      size: { value: 4 },
+      color: { value: "#00faff" },
+      move: { enable: true, speed: 2 },
+      line_linked: { enable: true, distance: 100, color: "#fff" }
+    }
+  });
+
+  // Admins autorizados (placa en minúsculas)
+  const admins = ["sam001", "admin002", "jefesamu"];
+
+  // Estado de sesión y datos
+  let currentUser = null;  // { placa: string, img: url, colores: {}, modoBajoConsumo: bool }
+  let pacientes = JSON.parse(localStorage.getItem("pacientes")) || [];
+  let usuariosSAMU = JSON.parse(localStorage.getItem("usuariosSAMU")) || [];
+
+  // Elementos DOM
+  const loginSection = document.getElementById("login-section");
+  const mainApp = document.getElementById("main-app");
+  const inputPlaca = document.getElementById("input-placa");
+  const btnLogin = document.getElementById("btn-login");
+  const loginError = document.getElementById("login-error");
+
+  const userPlacaSpan = document.getElementById("user-placa");
+  const profileImg = document.getElementById("profile-img");
+  const profileMenu = document.getElementById("profile-menu");
+  const btnCambiarImg = document.getElementById("btn-cambiar-img");
+  const btnToggleModo = document.getElementById("btn-toggle-modo");
+  const btnPersonalizarColores = document.getElementById("btn-personalizar-colores");
+  const btnCerrarSesion = document.getElementById("btn-cerrar-sesion");
+  const fileInput = document.getElementById("file-input");
+
+  const registroPacienteSection = document.getElementById("registro-paciente");
+  const pacienteNombreInput = document.getElementById("paciente-nombre");
+  const pacienteApellidoInput = document.getElementById("paciente-apellido");
+  const pacienteRazonInput = document.getElementById("paciente-razon");
+  const btnGuardarPaciente = document.getElementById("btn-guardar-paciente");
+
+  const pacientesLista = document.getElementById("pacientes-lista");
+  const usuariosLista = document.getElementById("usuarios-lista");
+  const listaUsuariosSection = document.getElementById("lista-usuarios");
+
+  // Mostrar/Ocultar menú perfil
+  document.getElementById("profile").addEventListener("click", () => {
+    profileMenu.classList.toggle("hidden");
+  });
+
+  // Iniciar sesión
+  btnLogin.addEventListener("click", () => {
+    const placa = inputPlaca.value.trim().toLowerCase();
+    if (!placa) {
+      loginError.textContent = "Por favor ingresa una placa SAMU.";
+      return;
+    }
+
+    loginError.textContent = "";
+
+    // Buscar usuario por placa o crearlo
+    let usuario = usuariosSAMU.find(u => u.placa === placa);
+    if (!usuario) {
+      // Nuevo usuario, crear por defecto
+      usuario = {
+        placa,
+        img: "https://i.pravatar.cc/50",
+        colores: { fondo: "#222", texto: "#fff" },
+        modoBajoConsumo: false,
+      };
+      usuariosSAMU.push(usuario);
+      guardarUsuarios();
+    }
+
+    currentUser = usuario;
+    iniciarSesion();
+  });
+
+  // Función para iniciar sesión y cargar datos
+  function iniciarSesion() {
+    loginSection.classList.add("hidden");
+    mainApp.classList.remove("hidden");
+
+    aplicarColoresPerfil();
+    userPlacaSpan.textContent = currentUser.placa.toUpperCase();
+    profileImg.src = currentUser.img;
+
+    // Mostrar sección lista usuarios si es admin
+    if (esAdmin()) {
+      listaUsuariosSection.classList.remove("hidden");
+      btnCambiarImg.disabled = false;
+      btnToggleModo.disabled = false;
+      btnPersonalizarColores.disabled = false;
+      cargarUsuarios();
+    } else {
+      listaUsuariosSection.classList.add("hidden");
+      btnCambiarImg.disabled = true;
+      btnToggleModo.disabled = true;
+      btnPersonalizarColores.disabled = true;
+    }
+
+    // Aplicar modo bajo consumo
+    document.body.classList.toggle("modo-bajo-consumo", currentUser.modoBajoConsumo);
+
+    mostrarPacientes();
+  }
+
+  // Guardar usuarios en localStorage
+  function guardarUsuarios() {
+    localStorage.setItem("usuariosSAMU", JSON.stringify(usuariosSAMU));
+  }
+
+  // Guardar pacientes en localStorage
+  function guardarPacientes() {
+    localStorage.setItem("pacientes", JSON.stringify(pacientes));
+  }
+
+  // Ver si es admin
+  function esAdmin() {
+    return admins.includes(currentUser.placa);
+  }
+
+  // Guardar paciente nuevo
+  btnGuardarPaciente.addEventListener("click", () => {
+    const nombre = pacienteNombreInput.value.trim();
+    const apellido = pacienteApellidoInput.value.trim();
+    const razon = pacienteRazonInput.value.trim();
+
+    if (!nombre || !apellido || !razon) {
+      alert("Complete todos los datos del paciente");
+      return;
+    }
+
+    pacientes.push({ nombre, apellido, razon, registradoPor: currentUser.placa, fecha: new Date().toLocaleString() });
+    guardarPacientes();
+    mostrarPacientes();
+
+    pacienteNombreInput.value = "";
+    pacienteApellidoInput.value = "";
+    pacienteRazonInput.value = "";
+  });
+
+  // Mostrar pacientes
+  function mostrarPacientes() {
+    pacientesLista.innerHTML = "";
+    pacientes.forEach((p, i) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${p.nombre} ${p.apellido}</strong> - ${p.razon} <br><small>Registrado por: ${p.registradoPor.toUpperCase()} (${p.fecha})</small>`;
+      pacientesLista.appendChild(li);
     });
+  }
 
-    // VARIABLES
-    const admins = ["danilo isaias cuevas ibarra", "jefe samu", "alto mando"];
-    let usuario = localStorage.getItem("usuarioActual") || "";
+  // Cargar usuarios en lista para admin
+  function cargarUsuarios() {
+    usuariosLista.innerHTML = "";
+    usuariosSAMU.forEach((u, i) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <strong>${u.placa.toUpperCase()}</strong>
+        <img src="${u.img}" alt="Perfil" class="mini-img" />
+        <button onclick="editarUsuario(${i})">Editar Placa</button>
+        <button onclick="eliminarUsuario(${i})" class="btn-danger">Eliminar</button>
+      `;
+      usuariosLista.appendChild(li);
+    });
+  }
 
-    document.getElementById("profilePic").onclick = () => {
-      document.getElementById("profileDropdown").classList.toggle("active");
+  // Editar usuario admin (solo placa aquí)
+  window.editarUsuario = function(i) {
+    const nuevaPlaca = prompt("Ingrese nueva placa para el usuario:", usuariosSAMU[i].placa);
+    if (!nuevaPlaca) return;
+    usuariosSAMU[i].placa = nuevaPlaca.trim().toLowerCase();
+    guardarUsuarios();
+    cargarUsuarios();
+  };
+
+  // Eliminar usuario admin
+  window.eliminarUsuario = function(i) {
+    if (!confirm("¿Eliminar usuario? Esta acción no se puede deshacer")) return;
+    usuariosSAMU.splice(i, 1);
+    guardarUsuarios();
+    cargarUsuarios();
+  };
+
+  // Cambiar imagen perfil (abre selector)
+  btnCambiarImg.addEventListener("click", () => {
+    if (!esAdmin()) return alert("Solo admins pueden cambiar la imagen");
+    fileInput.click();
+  });
+
+  // Al seleccionar archivo
+  fileInput.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      currentUser.img = ev.target.result;
+      profileImg.src = ev.target.result;
+      guardarUsuarios();
+      cargarUsuarios();
     };
+    reader.readAsDataURL(file);
+  });
 
-    function iniciarSesion() {
-      const nombre = document.getElementById("nombreUsuario").value.trim().toLowerCase();
-      if (!nombre) return alert("Ingresa tu nombre");
-      usuario = nombre;
-      localStorage.setItem("usuarioActual", usuario);
-      mostrarFormulario();
+  // Toggle modo bajo consumo
+  btnToggleModo.addEventListener("click", () => {
+    if (!esAdmin()) return alert("Solo admins pueden cambiar modo bajo consumo");
+    currentUser.modoBajoConsumo = !currentUser.modoBajoConsumo;
+    document.body.classList.toggle("modo-bajo-consumo", currentUser.modoBajoConsumo);
+    guardarUsuarios();
+  });
+
+  // Personalizar colores perfil (fondo y texto)
+  btnPersonalizarColores.addEventListener("click", () => {
+    if (!esAdmin()) return alert("Solo admins pueden personalizar colores");
+    const fondo = prompt("Color de fondo (hex o nombre):", currentUser.colores.fondo || "#222");
+    if (!fondo) return;
+    const texto = prompt("Color de texto (hex o nombre):", currentUser.colores.texto || "#fff");
+    if (!texto) return;
+
+    currentUser.colores = { fondo, texto };
+    aplicarColoresPerfil();
+    guardarUsuarios();
+  });
+
+  // Aplicar colores perfil
+  function aplicarColoresPerfil() {
+    document.body.style.backgroundColor = currentUser.colores.fondo || "#222";
+    document.body.style.color = currentUser.colores.texto || "#fff";
+  }
+
+  // Cerrar sesión
+  btnCerrarSesion.addEventListener("click", () => {
+    currentUser = null;
+    mainApp.classList.add("hidden");
+    loginSection.classList.remove("hidden");
+    inputPlaca.value = "";
+  });
+
+  // Para que funcione el script de editarUsuario y eliminarUsuario
+  window.editarUsuario = window.editarUsuario;
+  window.eliminarUsuario = window.eliminarUsuario;
+
+  // Si ya hay sesión guardada (opcional)
+  window.onload = () => {
+    if (localStorage.getItem("usuariosSAMU")) {
+      usuariosSAMU = JSON.parse(localStorage.getItem("usuariosSAMU"));
     }
-
-    function mostrarFormulario() {
-      document.getElementById("loginForm").style.display = "none";
-      document.getElementById("formularioPaciente").style.display = "block";
-      mostrarPacientes();
+    if (localStorage.getItem("pacientes")) {
+      pacientes = JSON.parse(localStorage.getItem("pacientes"));
     }
+  };
+</script>
 
-    function cerrarSesion() {
-      localStorage.removeItem("usuarioActual");
-      location.reload();
-    }
-
-    function guardarPaciente() {
-      const nombre = document.getElementById("pacienteNombre").value.trim();
-      const apellido = document.getElementById("pacienteApellido").value.trim();
-      const razon = document.getElementById("pacienteRazon").value.trim();
-      const placa = document.getElementById("pacientePlaca").value.trim();
-      if (!nombre || !apellido || !razon || !placa) return alert("Completa todos los campos");
-
-      const pacientes = JSON.parse(localStorage.getItem("pacientesSAMU")) || [];
-      pacientes.push({
-        nombre, apellido, razon, placa, creador: usuario,
-        fecha: new Date().toLocaleString()
-      });
-      localStorage.setItem("pacientesSAMU", JSON.stringify(pacientes));
-      mostrarPacientes();
-    }
-
-    function mostrarPacientes() {
-      const pacientes = JSON.parse(localStorage.getItem("pacientesSAMU")) || [];
-      const lista = document.getElementById("listaPacientes");
-      lista.innerHTML = "";
-
-      pacientes.forEach((p, i) => {
-        const li = document.createElement("li");
-        li.className = esAdmin() ? "admin-border" : "";
-        li.innerHTML = `
-          <strong>${p.nombre} ${p.apellido}</strong><br>
-          Placa: ${p.placa} - Razón: ${p.razon}<br>
-          <em>${p.fecha}</em><br>
-          <small>Creado por: ${p.creador}</small><br>
-          ${esAdmin() || p.creador === usuario ? `
-            <button onclick="borrarPaciente(${i})">Borrar</button>
-            <button onclick="editarPlaca(${i})">Editar Placa</button>
-          ` : ""}
-        `;
-        lista.appendChild(li);
-      });
-    }
-
-    function borrarPaciente(index) {
-      const pacientes = JSON.parse(localStorage.getItem("pacientesSAMU")) || [];
-      pacientes.splice(index, 1);
-      localStorage.setItem("pacientesSAMU", JSON.stringify(pacientes));
-      mostrarPacientes();
-    }
-
-    function editarPlaca(index) {
-      const nueva = prompt("Nueva placa:");
-      if (!nueva) return;
-      const pacientes = JSON.parse(localStorage.getItem("pacientesSAMU")) || [];
-      pacientes[index].placa = nueva;
-      localStorage.setItem("pacientesSAMU", JSON.stringify(pacientes));
-      mostrarPacientes();
-    }
-
-    function cambiarColor() {
-      document.body.classList.toggle("theme-light");
-      document.body.classList.toggle("theme-dark");
-    }
-
-    function modoBajoConsumo() {
-      document.getElementById("particles-js").style.display = "none";
-    }
-
-    function esAdmin() {
-      return admins.includes(usuario.toLowerCase());
-    }
-
-    // Iniciar si ya está logueado
-    if (usuario) mostrarFormulario();
-  </script>
 </body>
 </html>
