@@ -1,379 +1,151 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>MDT - Sistema SAMU</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MDT SAMU Metropolitana</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 </head>
 <body>
   <div id="particles-js"></div>
 
-  <!-- Sección Login -->
-  <section id="loginSection">
-    <h2>Iniciar Sesión SAMU</h2>
-    <input type="text" id="loginUser" placeholder="Nombre de Usuario" />
-    <input type="text" id="loginPlaca" placeholder="Placa" />
-    <button onclick="iniciarSesion()">Iniciar Sesión</button>
-    <p id="loginError" style="color:#f33;display:none;">Usuario o placa incorrectos.</p>
-  </section>
-
-  <!-- Perfil y personalización -->
-  <header id="perfil" style="display:none;">
-    <div class="info">
-      <img src="https://i.pravatar.cc/50" alt="Imagen Perfil" id="imgPerfil" />
-      <div>
-        <div class="nombre" id="nombrePerfil"></div>
-        <small id="placaPerfil"></small>
-      </div>
-    </div>
-    <button onclick="cerrarSesion()">Cerrar Sesión</button>
-  </header>
-
-  <!-- Personalización -->
-  <section id="personalizacion" style="display:none; padding: 10px 20px; background:#222; max-width:900px; margin:auto;">
-    <label for="colorPicker">Color de Perfil:</label>
-    <input type="color" id="colorPicker" value="#00faff" />
-    <button onclick="cambiarColorPerfil()">Cambiar Color</button>
-    <label for="imgURL">URL Imagen Perfil:</label>
-    <input type="text" id="imgURL" placeholder="URL Imagen" />
-    <button onclick="cambiarImagenPerfil()">Cambiar Imagen</button>
-  </section>
-
-  <div class="container" style="display:none;">
-    <!-- Formulario paciente -->
-    <form id="formPaciente">
-      <h3>Agregar Paciente</h3>
-      <label>Nombre Paciente</label>
-      <input type="text" id="pacienteNombre" required />
-      <label>Apellido Paciente</label>
-      <input type="text" id="pacienteApellido" required />
-      <label>Razón / Motivo</label>
-      <textarea id="pacienteRazon" rows="3" required></textarea>
-      <label>Fecha y Hora</label>
-      <input type="datetime-local" id="fechaHora" required />
-      <button type="submit">Guardar Paciente</button>
-    </form>
-
-    <!-- Listas -->
-    <section id="usuariosLista">
-      <h3>Usuarios SAMU</h3>
-      <ul id="listaUsuarios"></ul>
-    </section>
-
-    <section id="pacientesLista">
-      <h3>Pacientes Registrados</h3>
-      <ul id="listaPacientes"></ul>
-    </section>
+  <div class="login" id="login">
+    <h2>Iniciar Sesión</h2>
+    <input type="text" id="usuario" placeholder="Nombre completo">
+    <button onclick="iniciarSesion()">Entrar</button>
   </div>
 
-<script>
-  // Partículas
-  tsParticles.load("particles-js", {
-    particles: {
-      number: { value: 60 },
-      size: { value: 4 },
-      color: { value: "#00faff" },
-      move: { enable: true, speed: 2 },
-      line_linked: { enable: true, distance: 100, color: "#fff" }
-    }
-  });
+  <div class="container" id="sistema" style="display:none;">
+    <div id="perfil">
+      <h2>Mi Perfil</h2>
+      <img id="imagenPerfil" src="https://via.placeholder.com/100" alt="Perfil">
+      <input type="color" id="colorPerfil">
+      <button onclick="cambiarImagen()">Cambiar Imagen</button>
+      <h4 id="nombrePerfil"></h4>
+    </div>
+
+    <div class="pacientes">
+      <h2>Registrar Paciente</h2>
+      <input type="text" id="nombrePaciente" placeholder="Nombre Paciente">
+      <input type="text" id="apellidoPaciente" placeholder="Apellido Paciente">
+      <input type="text" id="razon" placeholder="Razón">
+      <button onclick="registrarPaciente()">Registrar</button>
+    </div>
+
+    <div class="registros">
+      <h2>Registros de Pacientes</h2>
+      <ul id="listaPacientes"></ul>
+    </div>
+
+    <div class="adminPanel" id="adminPanel" style="display:none">
+      <h2>Panel de Administrador</h2>
+      <ul id="listaUsuarios"></ul>
+    </div>
+  </div>
+
+  <input type="file" id="fileInput" style="display:none">
 
   <script>
-    // Nombres admins permitidos (puedes agregar más)
-    const ADMINS = ["admin", "director", "jefe"];
+    const admins = ["admin", "jefe", "director"];
+    let usuario = localStorage.getItem("usuario") || "";
 
-    // Selectores
-    const loginSection = document.getElementById("loginSection");
-    const loginUser = document.getElementById("loginUser");
-    const loginPlaca = document.getElementById("loginPlaca");
-    const btnLogin = document.getElementById("btnLogin");
-    const loginError = document.getElementById("loginError");
+    document.addEventListener("DOMContentLoaded", () => {
+      tsParticles.load("particles-js", {
+        particles: {
+          number: { value: 60 },
+          size: { value: 4 },
+          color: { value: ["#00faff", "#ff00ff", "#00ff00"] },
+          move: { enable: true, speed: 2 },
+          line_linked: { enable: true, distance: 100, color: "#fff" }
+        }
+      });
 
-    const perfil = document.getElementById("perfil");
-    const nombrePerfil = document.getElementById("nombrePerfil");
-    const placaPerfil = document.getElementById("placaPerfil");
-    const imgPerfil = document.getElementById("imgPerfil");
-    const inputImagen = document.getElementById("inputImagen");
-    const colorPicker = document.getElementById("colorPicker");
-    const btnCerrarSesion = document.getElementById("btnCerrarSesion");
-
-    const container = document.querySelector(".container");
-    const formPaciente = document.getElementById("formPaciente");
-    const listaUsuarios = document.getElementById("listaUsuarios");
-    const listaPacientes = document.getElementById("listaPacientes");
-
-    // LocalStorage keys
-    const LS_USUARIOS = "mdt_usuarios";
-    const LS_PACIENTES = "mdt_pacientes";
-    const LS_SESION = "mdt_sesion";
-
-    // Estado
-    let usuarios = JSON.parse(localStorage.getItem(LS_USUARIOS)) || [];
-    let pacientes = JSON.parse(localStorage.getItem(LS_PACIENTES)) || [];
-    let sesion = JSON.parse(localStorage.getItem(LS_SESION)) || null;
-
-    // Guarda sesión en LS
-    function guardarSesion(user) {
-      localStorage.setItem(LS_SESION, JSON.stringify(user));
-      sesion = user;
-    }
-
-    // Limpia sesión en LS
-    function limpiarSesion() {
-      localStorage.removeItem(LS_SESION);
-      sesion = null;
-    }
-
-    // Comprueba si el usuario actual es admin
-    function esAdmin() {
-      return sesion && ADMINS.includes(sesion.nombre.toLowerCase());
-    }
-
-    // Renderiza perfil
-    function renderPerfil() {
-      if (!sesion) return;
-      nombrePerfil.textContent = sesion.nombre;
-      placaPerfil.textContent = `Placa: ${sesion.placa}`;
-      imgPerfil.src = sesion.imagen || "https://i.pravatar.cc/50";
-      perfil.style.backgroundColor = sesion.color || "#111";
-
-      // Estilo especial para admin
-      if (esAdmin()) {
-        perfil.style.border = "3px solid #ffd700";
-      } else {
-        perfil.style.border = "none";
-      }
-    }
-
-    // Renderiza lista de usuarios (solo admins)
-    function renderUsuarios() {
-      if (!esAdmin()) {
-        listaUsuarios.innerHTML = "<li>No tienes permiso para ver usuarios.</li>";
-        return;
-      }
-
-      if (usuarios.length === 0) {
-        listaUsuarios.innerHTML = "<li>No hay usuarios registrados.</li>";
-        return;
-      }
-
-      listaUsuarios.innerHTML = usuarios
-        .map(
-          (u, i) => `
-          <li>
-            <span>${u.nombre} - ${u.placa}</span>
-            <div>
-              <button class="edit-btn" data-index="${i}">Editar</button>
-              <button class="btn-borrar" data-index="${i}">Borrar</button>
-            </div>
-          </li>`
-        )
-        .join("");
-
-      // Eventos botones editar y borrar
-      document.querySelectorAll(".edit-btn").forEach((btn) =>
-        btn.addEventListener("click", (e) => {
-          const i = e.target.dataset.index;
-          editarUsuario(i);
-        })
-      );
-
-      document.querySelectorAll(".btn-borrar").forEach((btn) =>
-        btn.addEventListener("click", (e) => {
-          const i = e.target.dataset.index;
-          borrarUsuario(i);
-        })
-      );
-    }
-
-    // Editar usuario admin (solo nombre y placa)
-    function editarUsuario(i) {
-      const usuario = usuarios[i];
-      const nuevoNombre = prompt("Editar nombre:", usuario.nombre);
-      const nuevaPlaca = prompt("Editar placa:", usuario.placa);
-
-      if (nuevoNombre && nuevaPlaca) {
-        usuarios[i].nombre = nuevoNombre.trim();
-        usuarios[i].placa = nuevaPlaca.trim();
-        localStorage.setItem(LS_USUARIOS, JSON.stringify(usuarios));
-        renderUsuarios();
-      }
-    }
-
-    // Borrar usuario admin
-    function borrarUsuario(i) {
-      if (confirm(`¿Eliminar usuario ${usuarios[i].nombre}?`)) {
-        usuarios.splice(i, 1);
-        localStorage.setItem(LS_USUARIOS, JSON.stringify(usuarios));
-        renderUsuarios();
-      }
-    }
-
-    // Render pacientes
-    function renderPacientes() {
-      if (pacientes.length === 0) {
-        listaPacientes.innerHTML = "<li>No hay pacientes registrados.</li>";
-        return;
-      }
-
-      listaPacientes.innerHTML = pacientes
-        .map(
-          (p, i) => `
-          <li>
-            <span>
-              <strong>${p.nombre} ${p.apellido}</strong> - ${p.razon} <br />
-              <small>${new Date(p.fechaHora).toLocaleString()}</small>
-            </span>
-            <button data-index="${i}">Borrar</button>
-          </li>`
-        )
-        .join("");
-
-      // Eventos borrar paciente
-      document.querySelectorAll("#listaPacientes button").forEach((btn) =>
-        btn.addEventListener("click", (e) => {
-          const i = e.target.dataset.index;
-          borrarPaciente(i);
-        })
-      );
-    }
-
-    // Borrar paciente
-    function borrarPaciente(i) {
-      if (confirm("¿Eliminar paciente?")) {
-        pacientes.splice(i, 1);
-        localStorage.setItem(LS_PACIENTES, JSON.stringify(pacientes));
-        renderPacientes();
-      }
-    }
-
-    // Login
-    btnLogin.addEventListener("click", () => {
-      const nombre = loginUser.value.trim();
-      const placa = loginPlaca.value.trim();
-
-      if (!nombre || !placa) {
-        loginError.textContent = "Por favor, ingresa nombre y placa";
-        loginError.style.display = "block";
-        return;
-      }
-
-      // Buscar si usuario ya existe
-      let usuario = usuarios.find(
-        (u) => u.nombre.toLowerCase() === nombre.toLowerCase()
-      );
-
-      if (!usuario) {
-        // Crear usuario nuevo
-        usuario = {
-          nombre,
-          placa,
-          imagen: "https://i.pravatar.cc/50",
-          color: "#111",
-        };
-        usuarios.push(usuario);
-        localStorage.setItem(LS_USUARIOS, JSON.stringify(usuarios));
-      }
-
-      guardarSesion(usuario);
-      iniciarSesion();
+      if (usuario) mostrarSistema();
     });
 
-    // Iniciar sesión y mostrar todo
     function iniciarSesion() {
-      loginSection.style.display = "none";
-      perfil.style.display = "flex";
-      container.style.display = "flex";
-      loginError.style.display = "none";
-
-      renderPerfil();
-      renderUsuarios();
-      renderPacientes();
+      usuario = document.getElementById("usuario").value.trim().toLowerCase();
+      if (!usuario) return alert("Ingresa tu nombre completo");
+      localStorage.setItem("usuario", usuario);
+      mostrarSistema();
     }
 
-    // Cerrar sesión
-    btnCerrarSesion.addEventListener("click", () => {
-      limpiarSesion();
-      perfil.style.display = "none";
-      container.style.display = "none";
-      loginSection.style.display = "block";
-      loginUser.value = "";
-      loginPlaca.value = "";
-    });
+    function mostrarSistema() {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("sistema").style.display = "block";
+      document.getElementById("nombrePerfil").innerText = usuario;
+      cargarPerfil();
+      mostrarPacientes();
+      if (admins.includes(usuario)) document.getElementById("adminPanel").style.display = "block";
+      mostrarUsuarios();
+    }
 
-    // Cambiar imagen perfil
-    inputImagen.addEventListener("change", () => {
-      const file = inputImagen.files[0];
-      if (!file) return;
+    function registrarPaciente() {
+      const nombre = document.getElementById("nombrePaciente").value;
+      const apellido = document.getElementById("apellidoPaciente").value;
+      const razon = document.getElementById("razon").value;
+      if (!nombre || !apellido || !razon) return;
+      const pacientes = JSON.parse(localStorage.getItem("pacientes") || "[]");
+      pacientes.push({ nombre, apellido, razon, registradoPor: usuario });
+      localStorage.setItem("pacientes", JSON.stringify(pacientes));
+      mostrarPacientes();
+    }
+
+    function mostrarPacientes() {
+      const lista = document.getElementById("listaPacientes");
+      lista.innerHTML = "";
+      const pacientes = JSON.parse(localStorage.getItem("pacientes") || "[]");
+      pacientes.forEach((p, i) => {
+        lista.innerHTML += `
+          <li>
+            ${p.nombre} ${p.apellido} - ${p.razon} (Por: ${p.registradoPor})
+            ${admins.includes(usuario) ? `<button onclick="eliminarPaciente(${i})">Eliminar</button>` : ""}
+          </li>
+        `;
+      });
+    }
+
+    function eliminarPaciente(i) {
+      const pacientes = JSON.parse(localStorage.getItem("pacientes") || "[]");
+      pacientes.splice(i, 1);
+      localStorage.setItem("pacientes", JSON.stringify(pacientes));
+      mostrarPacientes();
+    }
+
+    function cambiarImagen() {
+      document.getElementById("fileInput").click();
+    }
+
+    document.getElementById("fileInput").addEventListener("change", (e) => {
+      const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = () => {
-        sesion.imagen = reader.result;
-        imgPerfil.src = reader.result;
-
-        // Actualizar en usuarios
-        const idx = usuarios.findIndex(
-          (u) => u.nombre.toLowerCase() === sesion.nombre.toLowerCase()
-        );
-        if (idx !== -1) {
-          usuarios[idx].imagen = reader.result;
-          localStorage.setItem(LS_USUARIOS, JSON.stringify(usuarios));
-          guardarSesion(usuarios[idx]);
-        }
+        document.getElementById("imagenPerfil").src = reader.result;
+        localStorage.setItem("imgPerfil_" + usuario, reader.result);
       };
       reader.readAsDataURL(file);
     });
 
-    // Cambiar color fondo perfil
-    colorPicker.addEventListener("input", () => {
-      const color = colorPicker.value;
-      perfil.style.backgroundColor = color;
-      sesion.color = color;
-
-      // Actualizar usuarios
-      const idx = usuarios.findIndex(
-        (u) => u.nombre.toLowerCase() === sesion.nombre.toLowerCase()
-      );
-      if (idx !== -1) {
-        usuarios[idx].color = color;
-        localStorage.setItem(LS_USUARIOS, JSON.stringify(usuarios));
-        guardarSesion(usuarios[idx]);
-      }
+    document.getElementById("colorPerfil").addEventListener("input", (e) => {
+      document.getElementById("perfil").style.background = e.target.value;
+      localStorage.setItem("colorPerfil_" + usuario, e.target.value);
     });
 
-    // Form paciente
-    formPaciente.addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (!sesion) return alert("Debes iniciar sesión.");
+    function cargarPerfil() {
+      const color = localStorage.getItem("colorPerfil_" + usuario);
+      const img = localStorage.getItem("imgPerfil_" + usuario);
+      if (color) document.getElementById("perfil").style.background = color;
+      if (img) document.getElementById("imagenPerfil").src = img;
+    }
 
-      const nombre = formPaciente.pacienteNombre.value.trim();
-      const apellido = formPaciente.pacienteApellido.value.trim();
-      const razon = formPaciente.pacienteRazon.value.trim();
-      const fechaHora = formPaciente.fechaHora.value;
-
-      if (!nombre || !apellido || !razon || !fechaHora) {
-        alert("Completa todos los campos");
-        return;
-      }
-
-      const paciente = { nombre, apellido, razon, fechaHora };
-      pacientes.push(paciente);
-      localStorage.setItem(LS_PACIENTES, JSON.stringify(pacientes));
-      renderPacientes();
-
-      formPaciente.reset();
-    });
-
-    // Si ya hay sesión guardada, iniciar directamente
-    if (sesion) {
-      iniciarSesion();
-      colorPicker.value = sesion.color || "#111";
+    function mostrarUsuarios() {
+      if (!admins.includes(usuario)) return;
+      const lista = document.getElementById("listaUsuarios");
+      const pacientes = JSON.parse(localStorage.getItem("pacientes") || "[]");
+      const usuariosUnicos = [...new Set(pacientes.map(p => p.registradoPor))];
+      lista.innerHTML = usuariosUnicos.map(u => `<li>${u}</li>`).join("");
     }
   </script>
-</body>
-</html>
-
-
 </body>
 </html>
