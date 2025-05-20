@@ -1,150 +1,154 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MDT SAMU Metropolitana</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDT - Sistema SAMU</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="particles-js"></div>
 
-  <div class="login" id="login">
-    <h2>Iniciar Sesión</h2>
-    <input type="text" id="usuario" placeholder="Nombre completo">
-    <button onclick="iniciarSesion()">Entrar</button>
-  </div>
-
-  <div class="container" id="sistema" style="display:none;">
-    <div id="perfil">
-      <h2>Mi Perfil</h2>
-      <img id="imagenPerfil" src="https://via.placeholder.com/100" alt="Perfil">
-      <input type="color" id="colorPerfil">
-      <button onclick="cambiarImagen()">Cambiar Imagen</button>
-      <h4 id="nombrePerfil"></h4>
+  <header class="top-bar">
+    <div class="perfil">
+      <img id="imagenPerfil" src="default.png" alt="Perfil" />
+      <div>
+        <h3 id="usuarioNombre">No conectado</h3>
+        <button onclick="cambiarImagen()">Cambiar Imagen</button>
+      </div>
     </div>
+    <button onclick="cerrarSesion()" class="cerrar-sesion">Cerrar Sesión</button>
+  </header>
 
-    <div class="pacientes">
+  <main class="container">
+    <section id="login">
+      <h2>Iniciar Sesión SAMU</h2>
+      <input type="text" id="nombreUsuario" placeholder="Nombre completo" />
+      <input type="text" id="placaUsuario" placeholder="Placa" />
+      <button onclick="iniciarSesion()">Ingresar</button>
+    </section>
+
+    <section id="formulario" style="display:none;">
       <h2>Registrar Paciente</h2>
-      <input type="text" id="nombrePaciente" placeholder="Nombre Paciente">
-      <input type="text" id="apellidoPaciente" placeholder="Apellido Paciente">
-      <input type="text" id="razon" placeholder="Razón">
-      <button onclick="registrarPaciente()">Registrar</button>
-    </div>
+      <input type="text" id="pacienteNombre" placeholder="Nombre del paciente" />
+      <input type="text" id="pacienteApellido" placeholder="Apellido del paciente" />
+      <input type="text" id="razon" placeholder="Razón" />
+      <button onclick="guardarPaciente()">Guardar Paciente</button>
+    </section>
 
-    <div class="registros">
-      <h2>Registros de Pacientes</h2>
-      <ul id="listaPacientes"></ul>
-    </div>
+    <section id="panel">
+      <h2>Registros</h2>
+      <ul id="listaRegistros"></ul>
+    </section>
 
-    <div class="adminPanel" id="adminPanel" style="display:none">
-      <h2>Panel de Administrador</h2>
+    <section id="usuarios">
+      <h2>Usuarios</h2>
       <ul id="listaUsuarios"></ul>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <input type="file" id="fileInput" style="display:none">
-
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
   <script>
-    const admins = ["admin", "jefe", "director"];
-    let usuario = localStorage.getItem("usuario") || "";
-
-    document.addEventListener("DOMContentLoaded", () => {
-      tsParticles.load("particles-js", {
-        particles: {
-          number: { value: 60 },
-          size: { value: 4 },
-          color: { value: ["#00faff", "#ff00ff", "#00ff00"] },
-          move: { enable: true, speed: 2 },
-          line_linked: { enable: true, distance: 100, color: "#fff" }
-        }
-      });
-
-      if (usuario) mostrarSistema();
+    tsParticles.load("particles-js", {
+      particles: {
+        number: { value: 60 },
+        size: { value: 4 },
+        color: { value: "#00faff" },
+        move: { enable: true, speed: 2 },
+        line_linked: { enable: true, distance: 100, color: "#fff" }
+      }
     });
 
+    const admins = ["danilo cuevas", "jefe samu", "admin general"];
+    let usuario = JSON.parse(localStorage.getItem("usuarioSAMU")) || null;
+
+    if (usuario) cargarSesion();
+
     function iniciarSesion() {
-      usuario = document.getElementById("usuario").value.trim().toLowerCase();
-      if (!usuario) return alert("Ingresa tu nombre completo");
-      localStorage.setItem("usuario", usuario);
-      mostrarSistema();
+      const nombre = document.getElementById("nombreUsuario").value.toLowerCase();
+      const placa = document.getElementById("placaUsuario").value;
+      if (!nombre || !placa) return;
+      usuario = { nombre, placa };
+      localStorage.setItem("usuarioSAMU", JSON.stringify(usuario));
+      cargarSesion();
     }
 
-    function mostrarSistema() {
+    function cargarSesion() {
       document.getElementById("login").style.display = "none";
-      document.getElementById("sistema").style.display = "block";
-      document.getElementById("nombrePerfil").innerText = usuario;
-      cargarPerfil();
-      mostrarPacientes();
-      if (admins.includes(usuario)) document.getElementById("adminPanel").style.display = "block";
+      document.getElementById("formulario").style.display = "block";
+      document.getElementById("usuarioNombre").innerText = usuario.nombre;
+      mostrarRegistros();
       mostrarUsuarios();
     }
 
-    function registrarPaciente() {
-      const nombre = document.getElementById("nombrePaciente").value;
-      const apellido = document.getElementById("apellidoPaciente").value;
-      const razon = document.getElementById("razon").value;
-      if (!nombre || !apellido || !razon) return;
-      const pacientes = JSON.parse(localStorage.getItem("pacientes") || "[]");
-      pacientes.push({ nombre, apellido, razon, registradoPor: usuario });
-      localStorage.setItem("pacientes", JSON.stringify(pacientes));
-      mostrarPacientes();
+    function cerrarSesion() {
+      localStorage.removeItem("usuarioSAMU");
+      location.reload();
     }
 
-    function mostrarPacientes() {
-      const lista = document.getElementById("listaPacientes");
+    function cambiarImagen() {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = () => {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          document.getElementById("imagenPerfil").src = reader.result;
+          localStorage.setItem("imgPerfil", reader.result);
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    }
+
+    const imgGuardada = localStorage.getItem("imgPerfil");
+    if (imgGuardada) document.getElementById("imagenPerfil").src = imgGuardada;
+
+    function guardarPaciente() {
+      const nombre = document.getElementById("pacienteNombre").value;
+      const apellido = document.getElementById("pacienteApellido").value;
+      const razon = document.getElementById("razon").value;
+      if (!nombre || !apellido || !razon) return;
+      const registro = { nombre, apellido, razon, creadoPor: usuario.nombre, fecha: new Date().toLocaleString() };
+      let registros = JSON.parse(localStorage.getItem("registrosSAMU")) || [];
+      registros.push(registro);
+      localStorage.setItem("registrosSAMU", JSON.stringify(registros));
+      mostrarRegistros();
+      mostrarUsuarios();
+    }
+
+    function mostrarRegistros() {
+      const lista = document.getElementById("listaRegistros");
+      const registros = JSON.parse(localStorage.getItem("registrosSAMU")) || [];
       lista.innerHTML = "";
-      const pacientes = JSON.parse(localStorage.getItem("pacientes") || "[]");
-      pacientes.forEach((p, i) => {
+      registros.forEach((r, i) => {
         lista.innerHTML += `
           <li>
-            ${p.nombre} ${p.apellido} - ${p.razon} (Por: ${p.registradoPor})
-            ${admins.includes(usuario) ? `<button onclick="eliminarPaciente(${i})">Eliminar</button>` : ""}
+            <strong>${r.nombre} ${r.apellido}</strong> - ${r.razon} <br/><em>Por: ${r.creadoPor}</em>
+            ${esAdmin() ? `<br/><button onclick="eliminarRegistro(${i})">Eliminar</button>` : ""}
           </li>
         `;
       });
     }
 
-    function eliminarPaciente(i) {
-      const pacientes = JSON.parse(localStorage.getItem("pacientes") || "[]");
-      pacientes.splice(i, 1);
-      localStorage.setItem("pacientes", JSON.stringify(pacientes));
-      mostrarPacientes();
-    }
-
-    function cambiarImagen() {
-      document.getElementById("fileInput").click();
-    }
-
-    document.getElementById("fileInput").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        document.getElementById("imagenPerfil").src = reader.result;
-        localStorage.setItem("imgPerfil_" + usuario, reader.result);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    document.getElementById("colorPerfil").addEventListener("input", (e) => {
-      document.getElementById("perfil").style.background = e.target.value;
-      localStorage.setItem("colorPerfil_" + usuario, e.target.value);
-    });
-
-    function cargarPerfil() {
-      const color = localStorage.getItem("colorPerfil_" + usuario);
-      const img = localStorage.getItem("imgPerfil_" + usuario);
-      if (color) document.getElementById("perfil").style.background = color;
-      if (img) document.getElementById("imagenPerfil").src = img;
-    }
-
     function mostrarUsuarios() {
-      if (!admins.includes(usuario)) return;
+      const registros = JSON.parse(localStorage.getItem("registrosSAMU")) || [];
       const lista = document.getElementById("listaUsuarios");
-      const pacientes = JSON.parse(localStorage.getItem("pacientes") || "[]");
-      const usuariosUnicos = [...new Set(pacientes.map(p => p.registradoPor))];
-      lista.innerHTML = usuariosUnicos.map(u => `<li>${u}</li>`).join("");
+      const nombres = [...new Set(registros.map(r => r.creadoPor))];
+      lista.innerHTML = nombres.map(n => `<li>${n}</li>`).join("");
+    }
+
+    function eliminarRegistro(i) {
+      let registros = JSON.parse(localStorage.getItem("registrosSAMU")) || [];
+      registros.splice(i, 1);
+      localStorage.setItem("registrosSAMU", JSON.stringify(registros));
+      mostrarRegistros();
+      mostrarUsuarios();
+    }
+
+    function esAdmin() {
+      return usuario && admins.includes(usuario.nombre);
     }
   </script>
 </body>
