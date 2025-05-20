@@ -1,159 +1,155 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel SAMU Metropolitana</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>MDT SAMU - Sistema Médico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="particles-js"></div>
-  
-  <!-- Perfil y dropdown -->
+
+  <!-- PERFIL ARRIBA A LA DERECHA -->
   <div class="profile-container">
-    <img src="default.png" id="profilePic" class="profile-pic" alt="Perfil">
-    <div id="profileDropdown" class="dropdown">
-      <button onclick="changeTheme('light')">Modo Claro</button>
-      <button onclick="changeTheme('dark')">Modo Oscuro</button>
-      <button onclick="changeProfilePic()">Cambiar Imagen</button>
-      <button class="logout" onclick="logout()">Cerrar Sesión</button>
+    <img src="https://via.placeholder.com/50" class="profile-pic" id="profilePic" />
+    <div class="dropdown" id="profileDropdown">
+      <button onclick="cambiarColor()">Cambiar Color</button>
+      <button onclick="modoBajoConsumo()">Modo Bajo Consumo</button>
+      <button class="logout" onclick="cerrarSesion()">Cerrar Sesión</button>
     </div>
   </div>
 
-  <!-- Contenido Principal -->
   <div class="container">
-    <!-- Inicio de Sesión -->
-    <div class="formulario" id="loginForm">
+    <div id="loginForm">
       <h2>Iniciar Sesión</h2>
-      <input type="text" id="username" placeholder="Nombre de usuario">
-      <input type="text" id="placa" placeholder="Placa">
-      <button onclick="login()">Iniciar Sesión</button>
+      <input type="text" id="nombreUsuario" placeholder="Nombre completo" />
+      <button onclick="iniciarSesion()">Entrar</button>
     </div>
 
-    <!-- Formulario Paciente -->
-    <div class="formulario" id="pacienteForm" style="display:none;">
-      <h2>Registrar Paciente</h2>
-      <input type="text" id="nombrePaciente" placeholder="Nombre del paciente">
-      <input type="text" id="apellidoPaciente" placeholder="Apellido del paciente">
-      <input type="text" id="rutPaciente" placeholder="RUT">
-      <input type="text" id="motivo" placeholder="Motivo de atención">
-      <button onclick="registrarPaciente()">Registrar</button>
+    <div id="formularioPaciente" style="display:none">
+      <h2>Formulario SAMU</h2>
+      <input type="text" id="pacienteNombre" placeholder="Nombre del paciente" />
+      <input type="text" id="pacienteApellido" placeholder="Apellido del paciente" />
+      <input type="text" id="pacienteRazon" placeholder="Razón / Diagnóstico" />
+      <input type="text" id="pacientePlaca" placeholder="Placa SAMU" />
+      <button onclick="guardarPaciente()">Guardar</button>
     </div>
 
-    <!-- Registros -->
     <div class="registros">
-      <h2>Registros</h2>
+      <h2>Registros Guardados</h2>
       <ul id="listaPacientes"></ul>
     </div>
   </div>
 
-  <!-- Script completo -->
-  <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
   <script>
-    // Inicializar Partículas
-    particlesJS.load('particles-js', 'https://cdn.jsdelivr.net/gh/VincentGarreau/particles.js/particles.json');
-
-    // Usuarios admin definidos
-    const admins = ['Danilo', 'Carlos'];
-
-    // Al cargar la página
-    window.onload = () => {
-      const usuario = localStorage.getItem('usuario');
-      const placa = localStorage.getItem('placa');
-      const imagen = localStorage.getItem('imagen');
-      if (usuario && placa) {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('pacienteForm').style.display = 'block';
-        document.getElementById('profilePic').src = imagen || 'default.png';
-        if (admins.includes(usuario)) document.body.classList.add('admin-border');
-        mostrarPacientes();
+    // PARTÍCULAS
+    tsParticles.load("particles-js", {
+      particles: {
+        number: { value: 60 },
+        size: { value: 4 },
+        color: { value: "#00faff" },
+        move: { enable: true, speed: 2 },
+        line_linked: { enable: true, distance: 100, color: "#fff" }
       }
+    });
+
+    // VARIABLES
+    const admins = ["danilo isaias cuevas ibarra", "jefe samu", "alto mando"];
+    let usuario = localStorage.getItem("usuarioActual") || "";
+
+    document.getElementById("profilePic").onclick = () => {
+      document.getElementById("profileDropdown").classList.toggle("active");
     };
 
-    // Iniciar sesión
-    function login() {
-      const usuario = document.getElementById('username').value;
-      const placa = document.getElementById('placa').value;
-      if (!usuario || !placa) return alert('Completa todos los campos');
-      localStorage.setItem('usuario', usuario);
-      localStorage.setItem('placa', placa);
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('pacienteForm').style.display = 'block';
-      if (admins.includes(usuario)) document.body.classList.add('admin-border');
+    function iniciarSesion() {
+      const nombre = document.getElementById("nombreUsuario").value.trim().toLowerCase();
+      if (!nombre) return alert("Ingresa tu nombre");
+      usuario = nombre;
+      localStorage.setItem("usuarioActual", usuario);
+      mostrarFormulario();
+    }
+
+    function mostrarFormulario() {
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("formularioPaciente").style.display = "block";
       mostrarPacientes();
     }
 
-    // Registrar paciente
-    function registrarPaciente() {
-      const nombre = document.getElementById('nombrePaciente').value;
-      const apellido = document.getElementById('apellidoPaciente').value;
-      const rut = document.getElementById('rutPaciente').value;
-      const motivo = document.getElementById('motivo').value;
-      if (!nombre || !apellido || !rut || !motivo) return alert('Completa todo');
-      const pacientes = JSON.parse(localStorage.getItem('pacientes') || '[]');
-      pacientes.push({ nombre, apellido, rut, motivo });
-      localStorage.setItem('pacientes', JSON.stringify(pacientes));
+    function cerrarSesion() {
+      localStorage.removeItem("usuarioActual");
+      location.reload();
+    }
+
+    function guardarPaciente() {
+      const nombre = document.getElementById("pacienteNombre").value.trim();
+      const apellido = document.getElementById("pacienteApellido").value.trim();
+      const razon = document.getElementById("pacienteRazon").value.trim();
+      const placa = document.getElementById("pacientePlaca").value.trim();
+      if (!nombre || !apellido || !razon || !placa) return alert("Completa todos los campos");
+
+      const pacientes = JSON.parse(localStorage.getItem("pacientesSAMU")) || [];
+      pacientes.push({
+        nombre, apellido, razon, placa, creador: usuario,
+        fecha: new Date().toLocaleString()
+      });
+      localStorage.setItem("pacientesSAMU", JSON.stringify(pacientes));
       mostrarPacientes();
     }
 
-    // Mostrar pacientes
     function mostrarPacientes() {
-      const lista = document.getElementById('listaPacientes');
-      lista.innerHTML = '';
-      const pacientes = JSON.parse(localStorage.getItem('pacientes') || '[]');
+      const pacientes = JSON.parse(localStorage.getItem("pacientesSAMU")) || [];
+      const lista = document.getElementById("listaPacientes");
+      lista.innerHTML = "";
+
       pacientes.forEach((p, i) => {
-        const li = document.createElement('li');
-        li.textContent = `${p.nombre} ${p.apellido} (${p.rut}) - ${p.motivo}`;
-        if (admins.includes(localStorage.getItem('usuario'))) {
-          const btn = document.createElement('button');
-          btn.textContent = 'Eliminar';
-          btn.onclick = () => eliminarPaciente(i);
-          li.appendChild(btn);
-        }
+        const li = document.createElement("li");
+        li.className = esAdmin() ? "admin-border" : "";
+        li.innerHTML = `
+          <strong>${p.nombre} ${p.apellido}</strong><br>
+          Placa: ${p.placa} - Razón: ${p.razon}<br>
+          <em>${p.fecha}</em><br>
+          <small>Creado por: ${p.creador}</small><br>
+          ${esAdmin() || p.creador === usuario ? `
+            <button onclick="borrarPaciente(${i})">Borrar</button>
+            <button onclick="editarPlaca(${i})">Editar Placa</button>
+          ` : ""}
+        `;
         lista.appendChild(li);
       });
     }
 
-    function eliminarPaciente(i) {
-      const pacientes = JSON.parse(localStorage.getItem('pacientes'));
-      pacientes.splice(i, 1);
-      localStorage.setItem('pacientes', JSON.stringify(pacientes));
+    function borrarPaciente(index) {
+      const pacientes = JSON.parse(localStorage.getItem("pacientesSAMU")) || [];
+      pacientes.splice(index, 1);
+      localStorage.setItem("pacientesSAMU", JSON.stringify(pacientes));
       mostrarPacientes();
     }
 
-    function logout() {
-      localStorage.removeItem('usuario');
-      localStorage.removeItem('placa');
-      location.reload();
+    function editarPlaca(index) {
+      const nueva = prompt("Nueva placa:");
+      if (!nueva) return;
+      const pacientes = JSON.parse(localStorage.getItem("pacientesSAMU")) || [];
+      pacientes[index].placa = nueva;
+      localStorage.setItem("pacientesSAMU", JSON.stringify(pacientes));
+      mostrarPacientes();
     }
 
-    function changeTheme(theme) {
-      document.body.className = theme === 'light' ? 'theme-light' : 'theme-dark';
-      localStorage.setItem('theme', theme);
+    function cambiarColor() {
+      document.body.classList.toggle("theme-light");
+      document.body.classList.toggle("theme-dark");
     }
 
-    function changeProfilePic() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = () => {
-        const file = input.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = e => {
-            const dataURL = e.target.result;
-            localStorage.setItem('imagen', dataURL);
-            document.getElementById('profilePic').src = dataURL;
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-      input.click();
+    function modoBajoConsumo() {
+      document.getElementById("particles-js").style.display = "none";
     }
 
-    document.getElementById('profilePic').onclick = () => {
-      document.getElementById('profileDropdown').classList.toggle('active');
-    };
+    function esAdmin() {
+      return admins.includes(usuario.toLowerCase());
+    }
+
+    // Iniciar si ya está logueado
+    if (usuario) mostrarFormulario();
   </script>
 </body>
 </html>
